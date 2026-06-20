@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Pomodoro</title>
+  <!-- Tailwind CSS for styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Vue 3 for reactive frontend logic -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    [v-cloak] { display: none; }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  </style>
+</head>
+<body class="transition-colors duration-700">
+
+  <div id="app" v-cloak :style="{ backgroundColor: bgColors[mode] }" class="min-h-screen w-full flex items-center justify-center p-6">
+    <div class="w-full max-w-5xl grid md:grid-cols-2 gap-8 items-start">
+      
+      <!-- Timer Section -->
+      <div class="flex flex-col items-center">
+        <!-- Mode Switcher -->
+        <div class="flex gap-2 mb-8 bg-white rounded-full p-1 shadow-sm">
+          <button 
+            v-for="(m, key) in modes" 
+            :key="key"
+            @click="switchMode(key)"
+            class="px-4 py-2 rounded-full text-sm font-medium transition-all"
+            :style="{
+              backgroundColor: mode === key ? m.color : 'transparent',
+              color: mode === key ? 'white' : '#6b6b6b'
+            }"
+          >
+            {{ m.label }}
+          </button>
+        </div>
+
+        <!-- Progress Circle & Timer Display -->
+        <div class="relative w-72 h-72 flex items-center justify-center mb-8">
+          <svg class="w-full h-full -rotate-90" viewBox="0 0 280 280">
+            <circle cx="140" cy="140" :r="radius" fill="none" stroke="#eee" stroke-width="12" />
+            <circle 
+              cx="140" 
+              cy="140" 
+              :r="radius" 
+              fill="none" 
+              :stroke="currentColor" 
+              stroke-width="12" 
+              stroke-linecap="round"
+              :stroke-dasharray="circumference"
+              :stroke-dashoffset="dashOffset"
+              style="transition: stroke-dashoffset 1s linear;"
+            />
+          </svg>
+          <div class="absolute flex flex-col items-center">
+            <span class="text-6xl font-bold tabular-nums" :style="{ color: currentColor }">
+              {{ formatTime(secondsLeft) }}
+            </span>
+            <span v-if="activeTask" class="text-sm text-gray-500 mt-2 max-w-[180px] text-center truncate">
+              {{ activeTask.text }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center gap-4">
+          <button @click="resetTimer" class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors">
+            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+          </button>
+          <button 
+            @click="toggleRunning" 
+            class="w-20 h-20 rounded-full shadow-md flex items-center justify-center text-white transition-transform hover:scale-105 active:scale-95"
+            :style="{ backgroundColor: currentColor }"
+          >
+            <i :data-lucide="isRunning ? 'pause' : 'play'" class="w-7 h-7" :class="{ 'ml-1': !isRunning }"></i>
+          </button>
+          <button @click="showSettings = !showSettings" class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Stats -->
+        <div class="mt-8 text-sm text-gray-500">
+          🍅 {{ completedPomodoros }} pomodoro{{ completedPomodoros !== 1 ? 's' : '' }} completed today
+        </div>
+
+        <!-- Settings Panel -->
+        <div v-if="showSettings" class="mt-6 bg-white rounded-2xl shadow-sm p-5 w-full max-w-xs">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-700">Durations (minutes)</h3>
+            <button @click="showSettings = false" class="text-gray-400 hover:text-gray-600">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div v-for="(m, key) in modes" :key="key" class="flex items-center justify-between mb-3 last:mb-0">
+            <span class="text-sm text-gray-600">{{ m.label }}</span>
+            <input 
+              type="number" 
+              min="1" 
+              max="90" 
+              v-model.number="durations[key]"
+              @input="handleDurationChange(key)"
+              class="w-16 px-2 py-1 rounded-lg border border-gray-200 text-right text-sm focus:outline-none focus:ring-2"
+              :style="{ '--tw-ring-color': currentColor }"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Tasks Section -->
+      <div class="bg-white rounded-2xl shadow-sm p-6 h-full">
+        <h2 class="font-semibold text-gray-700 mb-4 text-lg">Tasks</h2>
+        
+        <!-- Add Task Input -->
+        <div class="flex gap-2 mb-5">
+          <input 
+            type="text" 
+            v-model="newTask" 
+            @keydown.enter="addTask"
+            placeholder="Add a task..." 
+            class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:border-transparent"
+            :style="{ '--tw-ring-color': currentColor }"
+          />
+          <button 
+            @click="addTask"
+            class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 hover:opacity-90 transition-opacity"
+            :style="{ backgroundColor: currentColor }"
+          >
+            <i data-lucide="plus" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Task List -->
+        <div class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+          <p v-if="tasks.length === 0" class="text-sm text-gray-400 text-center py-8">
+            No tasks yet. Add one to get started.
+          </p>
+          
+          <div 
+            v-for="task in tasks" 
+            :key="task.id"
+            @click="!task.done && (activeTaskId = task.id)"
+            class="group flex items-center gap-3 p-3 rounded-xl border transition-colors cursor-pointer"
+            :style="{
+              borderColor: activeTaskId === task.id ? currentColor : '#f0f0f0',
+              backgroundColor: activeTaskId === task.id ? currentColor + '0d' : 'transparent'
+            }"
+          >
+            <button 
+              @click.stop="toggleTask(task.id)"
+              class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
+              :style="{
+                borderColor: task.done ? currentColor : '#d1d1d1',
+                backgroundColor: task.done ? currentColor : 'transparent'
+              }"
+            >
+              <i v-if="task.done" data-lucide="check" class="w-3 h-3 text-white stroke-[3]"></i>
+            </button>
+            
+            <span class="flex-1 text-sm text-left" :class="task.done ? 'line-through text-gray-400' : 'text-gray-700'">
+              {{ task.text }}
+            </span>
+
+            <span 
+              v-if="activeTaskId === task.id && !task.done"
+              class="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white shrink-0"
+              :style="{ backgroundColor: currentColor }"
+            >
+              FOCUS
+            </span>
+
+            <button 
+              @click.stop="deleteTask(task.id)"
+              class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-opacity shrink-0"
+            >
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <div v-if="tasks.length > 0" class="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-400 text-center">
+          {{ completedTasksCount }} of {{ tasks.length }} completed
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
+
+    createApp({
+      setup() {
+        const bgColors = { work: '#fdf6f4', short: '#f1faf9', long: '#f3f6fc' };
+        const modes = {
+          work: { label: "Focus", color: "#e85d4e" },
+          short: { label: "Short Break", color: "#4ea8a0" },
+          long: { label: "Long Break", color: "#5b7fc7" }
+        };
+
+        // Load baseline configuration or sync with localStorage
+        const durations = ref(JSON.parse(localStorage.getItem('pomo_durations')) || { work: 25, short: 5, long: 15 });
+        const mode = ref("work");
+        const secondsLeft = ref(durations.value.work * 60);
+        const isRunning = ref(false);
+        const completedPomodoros = ref(parseInt(localStorage.getItem('pomo_completed')) || 0);
+        const showSettings = ref(false);
+        
+        const tasks = ref(JSON.parse(localStorage.getItem('pomo_tasks')) || []);
+        const newTask = ref("");
+        const activeTaskId = ref(localStorage.getItem('pomo_active_id') ? parseInt(localStorage.getItem('pomo_active_id')) : null);
+
+        let intervalId = null;
+        let audioCtx = null;
+        const radius = 130;
+        const circumference = 2 * Math.PI * radius;
+
+        // Computed
+        const totalSeconds = computed(() => durations.value[mode.value] * 60);
+        const currentColor = computed(() => modes[mode.value].color);
+        const progress = computed(() => 1 - (secondsLeft.value / totalSeconds.value));
+        const dashOffset = computed(() => circumference * (1 - progress.value));
+        const activeTask = computed(() => tasks.value.find(t => t.id === activeTaskId.value));
+        const completedTasksCount = computed(() => tasks.value.filter(t => t.done).length);
+
+        // Persistent Watchers
+        watch(tasks, (newTasks) => {
+          localStorage.setItem('pomo_tasks', JSON.stringify(newTasks));
+        }, { deep: true });
+
+        watch(activeTaskId, (newId) => {
+          if (newId) localStorage.setItem('pomo_active_id', newId);
+          else localStorage.removeItem('pomo_active_id');
+        });
+
+        watch(durations, (newDur) => {
+          localStorage.setItem('pomo_durations', JSON.stringify(newDur));
+        }, { deep: true });
+
+        watch(completedPomodoros, (newCount) => {
+          localStorage.setItem('pomo_completed', newCount);
+        });
+
+        // Methods
+        const playChime = () => {
+          try {
+            if (!audioCtx) {
+              audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            const now = audioCtx.currentTime;
+            [880, 1108, 1318].forEach((freq, i) => {
+              const osc = audioCtx.createOscillator();
+              const gain = audioCtx.createGain();
+              osc.type = "sine";
+              osc.frequency.value = freq;
+              gain.gain.setValueAtTime(0, now + i * 0.15);
+              gain.gain.linearRampToValueAtTime(0.2, now + i * 0.15 + 0.02);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.5);
+              osc.connect(gain);
+              gain.connect(audioCtx.destination);
+              osc.start(now + i * 0.15);
+              osc.stop(now + i * 0.15 + 0.5);
+            });
+          } catch (e) {}
+        };
+
+        const switchMode = (nextMode, autoStart = false) => {
+          clearInterval(intervalId);
+          isRunning.value = false;
+          mode.value = nextMode;
+          secondsLeft.value = durations.value[nextMode] * 60;
+          if (autoStart) toggleRunning();
+          nextTick(refreshIcons);
+        };
+
+        const toggleRunning = () => {
+          if (isRunning.value) {
+            clearInterval(intervalId);
+            isRunning.value = false;
+          } else {
+            isRunning.value = true;
+            intervalId = setInterval(() => {
+              if (secondsLeft.value <= 1) {
+                clearInterval(intervalId);
+                secondsLeft.value = 0;
+                isRunning.value = false;
+                playChime();
+
+                if (mode.value === "work") {
+                  completedPomodoros.value++;
+                  const nextMode = completedPomodoros.value % 4 === 0 ? "long" : "short";
+                  setTimeout(() => switchMode(nextMode, false), 50);
+                } else {
+                  setTimeout(() => switchMode("work", false), 50);
+                }
+              } else {
+                secondsLeft.value--;
+              }
+            }, 1000);
+          }
+          nextTick(refreshIcons);
+        };
+
+        const resetTimer = () => {
+          clearInterval(intervalId);
+          isRunning.value = false;
+          secondsLeft.value = durations.value[mode.value] * 60;
+          nextTick(refreshIcons);
+        };
+
+        const handleDurationChange = (key) => {
+          if (durations.value[key] < 1) durations.value[key] = 1;
+          if (!isRunning.value && mode.value === key) {
+            secondsLeft.value = durations.value[key] * 60;
+          }
+        };
+
+        const formatTime = (s) => {
+          const m = Math.floor(s / 60).toString().padStart(2, "0");
+          const sec = (s % 60).toString().padStart(2, "0");
+          return `${m}:${sec}`;
+        };
+
+        const addTask = () => {
+          const text = newTask.value.trim();
+          if (!text) return;
+          const task = { id: Date.now(), text, done: false };
+          tasks.value.push(task);
+          newTask.value = "";
+          if (!activeTaskId.value) activeTaskId.value = task.id;
+          nextTick(refreshIcons);
+        };
+
+        const toggleTask = (id) => {
+          const task = tasks.value.find(t => t.id === id);
+          if (task) {
+            task.done = !task.done;
+            if (task.done && activeTaskId.value === id) {
+              const nextActive = tasks.value.find(t => !t.done);
+              activeTaskId.value = nextActive ? nextActive.id : null;
+            }
+          }
+          nextTick(refreshIcons);
+        };
+
+        const deleteTask = (id) => {
+          tasks.value = tasks.value.filter(t => t.id !== id);
+          if (activeTaskId.value === id) {
+            const nextActive = tasks.value.find(t => !t.done);
+            activeTaskId.value = nextActive ? nextActive.id : null;
+          }
+          nextTick(refreshIcons);
+        };
+
+        const refreshIcons = () => {
+          if (window.lucide) {
+            window.lucide.createIcons();
+          }
+        };
+
+        onMounted(() => {
+          refreshIcons();
+          // Watch for settings panel changes to re-render icons inside it
+          watch(showSettings, () => nextTick(refreshIcons));
+        });
+
+        return {
+          bgColors, modes, durations, mode, secondsLeft, isRunning, completedPomodoros, showSettings,
+          tasks, newTask, activeTaskId, radius, circumference, totalSeconds, currentColor, progress,
+          dashOffset, activeTask, completedTasksCount, switchMode, toggleRunning, resetTimer,
+          handleDurationChange, formatTime, addTask, toggleTask, deleteTask
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
