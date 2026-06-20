@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DayDone — by Veer Singh</title>
+<meta name="description" content="DayDone: a focused Pomodoro timer and academic planner." />
+
+<!-- Tailwind CSS (CDN) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Vue 3 (CDN) -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<!-- Lucide Icons (CDN) -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    /* Accent system — shifts smoothly between modes */
+    --accent: #c9952c;
+    --accent-rgb: 201,149,44;
+    --accent-soft: rgba(201,149,44,0.16);
+    --accent-glow: rgba(201,149,44,0.55);
+
+    --bg-base: #0a0b0d;
+    --glass-bg: rgba(255,255,255,0.055);
+    --glass-bg-strong: rgba(255,255,255,0.09);
+    --glass-border: rgba(255,255,255,0.10);
+    --text-primary: #f4f2ee;
+    --text-secondary: rgba(244,242,238,0.62);
+    --text-tertiary: rgba(244,242,238,0.38);
+  }
+
+  html.light{
+    --bg-base: #eef0f3;
+    --glass-bg: rgba(255,255,255,0.55);
+    --glass-bg-strong: rgba(255,255,255,0.78);
+    --glass-border: rgba(20,20,25,0.08);
+    --text-primary: #181a1f;
+    --text-secondary: rgba(24,26,31,0.64);
+    --text-tertiary: rgba(24,26,31,0.42);
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, sans-serif;
+    transition: background-color .5s ease, color .5s ease;
+    overscroll-behavior: none;
+  }
+
+  body{ min-height: 100vh; }
+
+  .font-display{ font-family: 'Sora', 'Inter', system-ui, sans-serif; }
+  .font-mono{ font-family: 'JetBrains Mono', monospace; }
+
+  /* ---------- accent-driven utility classes ---------- */
+  .accent-transition{ transition: color .5s ease, background-color .5s ease, border-color .5s ease, box-shadow .5s ease, fill .5s ease; }
+  .text-accent{ color: var(--accent); }
+  .bg-accent{ background-color: var(--accent); }
+  .border-accent{ border-color: var(--accent); }
+  .accent-soft-bg{ background-color: var(--accent-soft); }
+  .accent-glow-shadow{ box-shadow: 0 0 24px 2px var(--accent-glow); }
+
+  /* ---------- accent color picker swatches ---------- */
+  .accent-swatch{
+    width: 30px; height: 30px;
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    position: relative;
+    transition: transform .2s ease, border-color .2s ease;
+    cursor: pointer;
+  }
+  .accent-swatch:hover{ transform: scale(1.08); }
+  .accent-swatch.selected{ border-color: var(--text-primary); }
+  .accent-swatch.selected::after{
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: 9999px;
+    border: 1.5px solid var(--text-primary);
+    opacity: .5;
+  }
+
+  /* ---------- ambient accent glow backdrop (replaces wallpaper) ---------- */
+  .ambient-glow{
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.55;
+    transition: opacity .6s ease;
+  }
+  html.light .ambient-glow{ opacity: 0.35; }
+  .ambient-glow::before,
+  .ambient-glow::after{
+    content: '';
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(120px);
+    transition: background-color .6s ease;
+  }
+  .ambient-glow::before{
+    width: 480px; height: 480px;
+    top: -10%; left: -8%;
+    background: var(--accent);
+    opacity: 0.20;
+  }
+  .ambient-glow::after{
+    width: 420px; height: 420px;
+    bottom: -12%; right: -6%;
+    background: var(--accent);
+    opacity: 0.14;
+  }
+
+  /* ---------- glass surfaces ---------- */
+  .glass{
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.05);
+    transition: background-color .5s ease, border-color .5s ease, box-shadow .35s ease;
+  }
+  html.light .glass{
+    box-shadow: 0 8px 32px rgba(20,20,40,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+  .glass-strong{
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(26px) saturate(150%);
+    -webkit-backdrop-filter: blur(26px) saturate(150%);
+  }
+
+  /* ---------- scrollbar ---------- */
+  ::-webkit-scrollbar{ width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track{ background: transparent; }
+  ::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.14); border-radius: 8px; }
+  html.light ::-webkit-scrollbar-thumb{ background: rgba(0,0,0,0.14); }
+
+  /* ---------- buttons ---------- */
+  .icon-btn{
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    transition: all .25s ease;
+  }
+  .icon-btn:hover{
+    color: var(--text-primary);
+    background: var(--glass-bg-strong);
+    transform: translateY(-1px);
+  }
+  .icon-btn:active{ transform: translateY(0); }
+
+  .btn-accent{
+    background: var(--accent);
+    color: #0a0b0d;
+    font-weight: 600;
+    transition: all .35s ease, filter .15s ease;
+  }
+  .btn-accent:hover{ filter: brightness(1.08); transform: translateY(-1px); }
+  .btn-accent:active{ transform: translateY(0); filter: brightness(0.96); }
+
+  .btn-ghost{
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    transition: all .25s ease;
+  }
+  .btn-ghost:hover{ color: var(--text-primary); background: var(--glass-bg-strong); }
+
+  /* ---------- progress ring ---------- */
+  .progress-ring-track{ stroke: rgba(255,255,255,0.08); transition: stroke .5s ease; }
+  html.light .progress-ring-track{ stroke: rgba(0,0,0,0.07); }
+  .progress-ring-active{
+    stroke: var(--accent);
+    filter: drop-shadow(0 0 10px var(--accent-glow)) drop-shadow(0 0 22px var(--accent-glow));
+    transition: stroke .5s ease, filter .5s ease;
+  }
+
+  /* ---------- task cards ---------- */
+  .task-card{
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    border-left: 3.5px solid transparent;
+    transition: border-color .35s ease, background-color .35s ease, transform .15s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .task-card:hover{ transform: translateX(2px); }
+  .task-card.active-task{
+    border-color: var(--accent);
+    border-left-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  /* ---------- mode tabs ---------- */
+  .mode-tab{
+    position: relative;
+    transition: color .35s ease;
+    color: var(--text-secondary);
+  }
+  .mode-tab.active{ color: var(--text-primary); }
+  .mode-pill{
+    transition: transform .4s cubic-bezier(.65,0,.35,1), width .4s cubic-bezier(.65,0,.35,1), background-color .5s ease, opacity .25s ease;
+    left: 0;
+  }
+
+  /* ---------- modal / overlay ---------- */
+  .overlay-backdrop{
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+  }
+  html.light .overlay-backdrop{ background: rgba(20,20,30,0.35); }
+
+  /* ---------- animations ---------- */
+  @keyframes fadeSlideIn{
+    from{ opacity: 0; transform: translateY(8px); }
+    to{ opacity: 1; transform: translateY(0); }
+  }
+  .fade-slide-in{ animation: fadeSlideIn .4s ease both; }
+
+  @keyframes quoteFade{
+    0%{ opacity: 0; transform: translateY(4px); }
+    10%{ opacity: 1; transform: translateY(0); }
+    90%{ opacity: 1; transform: translateY(0); }
+    100%{ opacity: 0; transform: translateY(-4px); }
+  }
+
+  .fade-enter-active, .fade-leave-active{ transition: opacity .35s ease, transform .35s ease; }
+  .fade-enter-from{ opacity: 0; transform: translateY(6px); }
+  .fade-leave-to{ opacity: 0; transform: translateY(-6px); }
+
+  .modal-enter-active, .modal-leave-active{ transition: opacity .25s ease; }
+  .modal-enter-from, .modal-leave-to{ opacity: 0; }
+  .modal-enter-active .modal-panel, .modal-leave-active .modal-panel{ transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .25s ease; }
+  .modal-enter-from .modal-panel, .modal-leave-to .modal-panel{ transform: scale(0.94) translateY(10px); opacity: 0; }
+
+  .list-enter-active, .list-leave-active{ transition: all .3s ease; }
+  .list-enter-from{ opacity: 0; transform: translateX(-10px); }
+  .list-leave-to{ opacity: 0; transform: translateX(10px); }
+  .list-leave-active{ position: absolute; width: 100%; }
+
+  /* task completion celebration burst */
+  @keyframes burstParticle{
+    0%{ transform: translate(0,0) scale(1); opacity: 1; }
+    100%{ transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+  }
+  .particle{
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: burstParticle .7s cubic-bezier(.2,.8,.3,1) forwards;
+  }
+
+  @keyframes checkPop{
+    0%{ transform: scale(1); }
+    35%{ transform: scale(1.3); }
+    100%{ transform: scale(1); }
+  }
+  .check-pop{ animation: checkPop .4s ease; }
+
+  @keyframes pulseGlow{
+    0%,100%{ box-shadow: 0 0 0 0 var(--accent-glow); }
+    50%{ box-shadow: 0 0 0 6px rgba(0,0,0,0); }
+  }
+  .running-pulse{ animation: pulseGlow 2.4s ease-in-out infinite; }
+
+  @keyframes spinSlow{ from{ transform: rotate(0deg); } to{ transform: rotate(360deg); } }
+  .spin-slow{ animation: spinSlow 1.1s linear infinite; }
+
+  /* calendar dot */
+  .day-dot{
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent);
+    transition: background-color .5s ease;
+  }
+
+  /* analytics bars */
+  .bar-fill{
+    transition: height .6s cubic-bezier(.2,.8,.2,1), background-color .5s ease;
+  }
+
+  /* focus visibility */
+  button:focus-visible, input:focus-visible, [tabindex]:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button{
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+
+  [v-cloak]{ display: none; }
+</style>
+</head>
+<body class="font-sans antialiased min-h-screen">
+<div id="app" v-cloak>
+
+  <!-- Ambient accent-colored glow backdrop (replaces wallpaper) -->
+  <div class="ambient-glow"></div>
+
+  <!-- App shell -->
+  <div class="relative z-10 min-h-screen flex flex-col">
+
+    <!-- ===================== HEADER ===================== -->
+    <header class="sticky top-0 z-30 glass border-b" :style="{borderColor:'var(--glass-border)'}">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+
+        <!-- Logo / wordmark -->
+        <div class="flex items-center min-w-0">
+          <div class="min-w-0 leading-tight">
+            <div class="font-display font-extrabold text-xl sm:text-2xl tracking-tight truncate accent-transition" style="color:var(--text-primary)">DayDone</div>
+            <div class="text-[0.65rem] font-medium truncate -mt-0.5" style="color:var(--text-tertiary)">by Veer Singh</div>
+          </div>
+        </div>
+
+        <!-- Header actions -->
+        <div class="flex items-center gap-1 sm:gap-1.5">
+          <button @click="openPlanner" class="icon-btn relative" title="Planner & Schedule" aria-label="Open planner">
+            <i data-lucide="calendar-days" class="w-[18px] h-[18px]"></i>
+            <span v-if="todayTaskCount > 0"
+                  class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center accent-transition"
+                  :style="{ background:'var(--accent)', color:'#0a0b0d' }">{{ todayTaskCount > 9 ? '9+' : todayTaskCount }}</span>
+          </button>
+          <button @click="openSettings" class="icon-btn" title="Settings" aria-label="Open settings">
+            <i data-lucide="settings-2" class="w-[18px] h-[18px]"></i>
+          </button>
+          <button @click="toggleDark" class="icon-btn" title="Toggle theme" aria-label="Toggle dark / light mode">
+            <i :data-lucide="isDark ? 'sun' : 'moon'" class="w-[18px] h-[18px]"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===================== MAIN ===================== -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10">
+
+      <!-- Greeting + rotating quote -->
+      <div class="text-center mb-6 h-10 flex items-center justify-center">
+        <transition name="fade" mode="out-in">
+          <p :key="currentQuote" class="text-sm sm:text-[0.95rem] font-medium" style="color:var(--text-secondary)">
+            {{ greeting }} <span style="color:var(--text-tertiary)">·</span> {{ currentQuote }}
+          </p>
+        </transition>
+      </div>
+
+      <!-- Mode switcher -->
+      <div class="flex justify-center mb-8">
+        <div class="glass rounded-2xl p-1 flex gap-1 relative">
+          <div class="absolute top-1 bottom-1 rounded-xl mode-pill accent-transition"
+               :style="modePillStyle"></div>
+          <button v-for="(m, idx) in modes" :key="m.key"
+                  :ref="el => modeTabRefs[idx] = el"
+                  @click="switchMode(m.key)"
+                  class="mode-tab px-4 sm:px-5 py-2 rounded-xl text-sm font-semibold relative z-10 accent-transition"
+                  :class="{ active: mode === m.key }">
+            <span class="relative z-10 flex items-center gap-1.5">
+              <i :data-lucide="m.icon" class="w-3.5 h-3.5"></i>
+              {{ m.label }}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ============ TIMER + CONTENT GRID ============ -->
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+
+        <!-- ---------- Timer Card ---------- -->
+        <div class="lg:col-span-2 glass rounded-3xl p-6 sm:p-8 flex flex-col items-center fade-slide-in">
+
+          <div class="text-xs font-semibold uppercase tracking-[0.2em] mb-1 accent-transition" style="color:var(--accent)">
+            {{ modeLabel }}
+          </div>
+          <div class="text-[0.7rem] mb-6" style="color:var(--text-tertiary)">
+            Round {{ Math.min(pomodorosThisCycle + 1, 4) }} of 4
+            <span v-if="mode==='pomodoro' && activeTask"> · {{ activeTask.text }}</span>
+          </div>
+
+          <!-- Progress ring -->
+          <div class="relative w-60 h-60 sm:w-64 sm:h-64 mb-7">
+            <svg viewBox="0 0 220 220" class="w-full h-full -rotate-90">
+              <circle cx="110" cy="110" r="100" fill="none" stroke-width="10" class="progress-ring-track"/>
+              <circle cx="110" cy="110" r="100" fill="none" stroke-width="10"
+                      stroke-linecap="round"
+                      class="progress-ring-active"
+                      :stroke-dasharray="ringCircumference"
+                      :stroke-dashoffset="ringOffset"/>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <div class="font-mono font-bold text-5xl sm:text-6xl tabular-nums tracking-tight">{{ timeDisplay }}</div>
+              <div class="text-[0.65rem] mt-2 font-medium" style="color:var(--text-tertiary)">{{ isRunning ? 'Focusing…' : (secondsLeft===durations[mode]*60 ? 'Ready' : 'Paused') }}</div>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div class="flex items-center gap-3">
+            <button @click="resetTimer" class="icon-btn btn-ghost rounded-full" title="Reset" aria-label="Reset timer">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            </button>
+
+            <button @click="toggleTimer"
+                    class="btn-accent w-16 h-16 rounded-full flex items-center justify-center accent-glow-shadow"
+                    :class="{ 'running-pulse': isRunning }"
+                    :aria-label="isRunning ? 'Pause timer' : 'Start timer'">
+              <i :key="isRunning ? 'pause' : 'play'" :data-lucide="isRunning ? 'pause' : 'play'" class="w-7 h-7" :style="!isRunning ? 'margin-left:2px' : ''"></i>
+            </button>
+
+            <button @click="skipTimer" class="icon-btn btn-ghost rounded-full" title="Skip" aria-label="Skip to next">
+              <i data-lucide="skip-forward" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Stats footer -->
+          <div class="mt-8 w-full">
+            <div class="glass-strong rounded-2xl px-4 py-3 flex items-center justify-between accent-transition">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center accent-soft-bg accent-transition">
+                  <i data-lucide="flame" class="w-4 h-4 accent-transition" style="color:var(--accent)"></i>
+                </div>
+                <div class="leading-tight">
+                  <div class="text-[0.65rem] font-medium" style="color:var(--text-tertiary)">Today</div>
+                  <div class="text-sm font-bold font-mono">{{ pomodorosToday }} pomodoros</div>
+                </div>
+              </div>
+              <div class="text-right leading-tight">
+                <div class="text-[0.65rem] font-medium" style="color:var(--text-tertiary)">All time</div>
+                <div class="text-sm font-bold font-mono">{{ totalPomodoros }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- Right panel: Tasks (Pomodoro) OR Break message (Break modes) ---------- -->
+        <div class="lg:col-span-3">
+
+          <!-- FOCUS MODE: Tasks panel -->
+          <div v-if="mode === 'pomodoro'" class="glass rounded-3xl p-5 sm:p-7 fade-slide-in">
+            <div class="flex items-center justify-between mb-1">
+              <button @click="tasksExpanded = !tasksExpanded" class="flex items-center gap-2 group">
+                <i data-lucide="list-checks" class="w-[18px] h-[18px] accent-transition" style="color:var(--accent)"></i>
+                <h2 class="font-display font-bold text-lg">Tasks</h2>
+                <i :data-lucide="tasksExpanded ? 'chevron-up' : 'chevron-down'" class="w-4 h-4 transition-transform" style="color:var(--text-tertiary)"></i>
+              </button>
+              <span class="text-xs font-medium" style="color:var(--text-tertiary)">{{ completedTodayCount }}/{{ todayTasks.length }} done</span>
+            </div>
+
+            <transition name="fade">
+            <div v-show="tasksExpanded" class="mt-4">
+              <!-- Add task -->
+              <form @submit.prevent="addTask" class="flex gap-2 mb-4">
+                <input v-model="newTaskText"
+                       type="text"
+                       placeholder="Add a task for today…"
+                       maxlength="140"
+                       class="flex-1 glass-strong rounded-xl px-4 py-2.5 text-sm outline-none placeholder:opacity-50"
+                       :style="{ color: 'var(--text-primary)' }"
+                       @keydown.enter.prevent="addTask" />
+                <button type="submit" class="btn-accent rounded-xl px-4 flex items-center justify-center shrink-0" aria-label="Add task">
+                  <i data-lucide="plus" class="w-4 h-4"></i>
+                </button>
+              </form>
+
+              <!-- Task list -->
+              <div class="space-y-2.5 max-h-[340px] overflow-y-auto pr-1 relative">
+                <transition-group name="list">
+                  <div v-for="task in todayTasks" :key="task.id"
+                       :id="'task-'+task.id"
+                       class="task-card rounded-2xl px-4 py-3 flex items-center gap-3 cursor-pointer"
+                       :class="{ 'active-task': activeTaskId === task.id }"
+                       @click="setActiveTask(task.id)">
+
+                    <button @click.stop="toggleTaskDone(task, $event)"
+                            class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 accent-transition"
+                            :class="task.done ? 'btn-accent border-transparent' : ''"
+                            :style="!task.done ? { borderColor: 'var(--text-tertiary)' } : {}"
+                            :aria-label="task.done ? 'Mark incomplete' : 'Mark complete'">
+                      <i v-if="task.done" data-lucide="check" class="w-3 h-3" style="color:#0a0b0d"></i>
+                    </button>
+
+                    <span class="flex-1 text-sm min-w-0 truncate" :class="{ 'line-through opacity-40': task.done }">{{ task.text }}</span>
+
+                    <span v-if="task.time" class="text-[0.65rem] font-mono shrink-0 hidden sm:inline" style="color:var(--text-tertiary)">{{ task.time }}</span>
+
+                    <button @click.stop="deleteTask(task.id)" class="icon-btn !w-7 !h-7 shrink-0" aria-label="Delete task">
+                      <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                    </button>
+                  </div>
+                </transition-group>
+
+                <div v-if="todayTasks.length === 0" class="text-center py-10" style="color:var(--text-tertiary)">
+                  <i data-lucide="coffee" class="w-7 h-7 mx-auto mb-2 opacity-50"></i>
+                  <p class="text-sm">No tasks yet for today. Add one above, or plan ahead in the Planner.</p>
+                </div>
+              </div>
+            </div>
+            </transition>
+          </div>
+
+          <!-- BREAK MODE: calm message box -->
+          <div v-else class="glass rounded-3xl p-8 sm:p-10 flex flex-col items-center justify-center text-center fade-slide-in min-h-[260px]">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 accent-soft-bg accent-transition">
+              <i :data-lucide="mode === 'short_break' ? 'leaf' : 'cloud-moon'" class="w-7 h-7 accent-transition" style="color:var(--accent)"></i>
+            </div>
+            <transition name="fade" mode="out-in">
+              <p :key="currentBreakPrompt" class="font-display text-xl sm:text-2xl font-semibold max-w-xs">{{ currentBreakPrompt }}</p>
+            </transition>
+            <p class="text-sm mt-3" style="color:var(--text-tertiary)">{{ mode === 'short_break' ? 'A short pause keeps your focus sharp.' : 'You\'ve earned a real reset — step away fully.' }}</p>
+          </div>
+
+        </div>
+      </div>
+    </main>
+
+    <footer class="text-center pb-6 pt-2 text-[0.7rem]" style="color:var(--text-tertiary)">
+      DayDone · crafted for deep work · by Veer Singh
+    </footer>
+  </div>
+
+  <!-- ===================== SETTINGS MODAL ===================== -->
+  <transition name="modal">
+    <div v-if="showSettings" class="fixed inset-0 z-50 flex items-center justify-center p-4 overlay-backdrop" @click.self="showSettings = false">
+      <div class="modal-panel glass-strong rounded-3xl p-6 sm:p-7 w-full max-w-sm">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="font-display font-bold text-lg flex items-center gap-2">
+            <i data-lucide="settings-2" class="w-[18px] h-[18px]"></i> Settings
+          </h3>
+          <button @click="showSettings = false" class="icon-btn" aria-label="Close settings"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+
+        <form @submit.prevent="showSettings = false" class="space-y-4">
+          <div v-for="d in durationFields" :key="d.key">
+            <label class="text-xs font-medium flex justify-between mb-1.5" style="color:var(--text-secondary)">
+              <span>{{ d.label }}</span>
+              <span class="font-mono">{{ durations[d.key] }} min</span>
+            </label>
+            <input type="range" min="1" max="60" v-model.number="durations[d.key]"
+                   @input="onDurationChange"
+                   class="w-full accent-[var(--accent)]" />
+          </div>
+
+          <div class="pt-2 border-t" :style="{borderColor:'var(--glass-border)'}">
+            <label class="text-xs font-medium mb-2 block" style="color:var(--text-secondary)">Accent color</label>
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <button v-for="c in accentOptions" :key="c.hex" type="button"
+                      @click="setAccent(c)"
+                      class="accent-swatch"
+                      :class="{ selected: accentHex === c.hex }"
+                      :style="{ background: c.hex }"
+                      :aria-label="'Use ' + c.name + ' accent'"
+                      :title="c.name">
+              </button>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t" :style="{borderColor:'var(--glass-border)'}">
+            <label class="text-xs font-medium mb-1.5 block" style="color:var(--text-secondary)">Sound</label>
+            <button type="button" @click="soundEnabled = !soundEnabled; persist()"
+                    class="w-full flex items-center justify-between glass rounded-xl px-4 py-2.5">
+              <span class="text-sm flex items-center gap-2">
+                <i :data-lucide="soundEnabled ? 'volume-2' : 'volume-x'" class="w-4 h-4"></i>
+                Alarm & chimes
+              </span>
+              <div class="w-9 h-5 rounded-full relative accent-transition" :style="{ background: soundEnabled ? 'var(--accent)' : 'var(--glass-border)' }">
+                <div class="w-3.5 h-3.5 rounded-full bg-white absolute top-[3px] transition-all" :style="{ left: soundEnabled ? '19px' : '3px' }"></div>
+              </div>
+            </button>
+          </div>
+
+          <button type="submit" class="btn-accent w-full rounded-xl py-2.5 text-sm mt-2">Done</button>
+        </form>
+      </div>
+    </div>
+  </transition>
+
+  <!-- ===================== PLANNER MODAL ===================== -->
+  <transition name="modal">
+    <div v-if="showPlanner" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overlay-backdrop" @click.self="showPlanner = false">
+      <div class="modal-panel glass-strong rounded-3xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
+
+        <!-- Planner header -->
+        <div class="sticky top-0 z-10 glass-strong px-5 sm:px-7 py-4 flex items-center justify-between border-b" :style="{borderColor:'var(--glass-border)'}">
+          <h3 class="font-display font-bold text-lg flex items-center gap-2">
+            <i data-lucide="calendar-days" class="w-5 h-5 accent-transition" style="color:var(--accent)"></i>
+            Planner & Schedule
+          </h3>
+          <div class="flex items-center gap-1.5">
+            <button @click="plannerView = plannerView === 'calendar' ? 'analytics' : 'calendar'"
+                    class="btn-ghost rounded-xl px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5">
+              <i :data-lucide="plannerView === 'calendar' ? 'bar-chart-3' : 'calendar'" class="w-3.5 h-3.5"></i>
+              {{ plannerView === 'calendar' ? '7-Day Analytics' : 'Calendar' }}
+            </button>
+            <button @click="showPlanner = false" class="icon-btn" aria-label="Close planner"><i data-lucide="x" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+
+        <div class="p-5 sm:p-7">
+
+          <!-- ===== CALENDAR VIEW ===== -->
+          <div v-if="plannerView === 'calendar'" class="grid grid-cols-1 md:grid-cols-5 gap-6">
+
+            <!-- Month grid -->
+            <div class="md:col-span-3">
+              <div class="flex items-center justify-between mb-4">
+                <button @click="changeMonth(-1)" class="icon-btn" aria-label="Previous month"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                <h4 class="font-display font-semibold text-base">{{ monthLabel }}</h4>
+                <button @click="changeMonth(1)" class="icon-btn" aria-label="Next month"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+              </div>
+
+              <div class="grid grid-cols-7 gap-1.5 mb-1.5">
+                <div v-for="d in ['S','M','T','W','T','F','S']" :key="d" class="text-center text-[0.65rem] font-bold py-1" style="color:var(--text-tertiary)">{{ d }}</div>
+              </div>
+
+              <div class="grid grid-cols-7 gap-1.5">
+                <div v-for="(cell, i) in calendarCells" :key="i" class="aspect-square">
+                  <button v-if="cell"
+                          @click="selectDay(cell.dateStr)"
+                          class="w-full h-full rounded-xl flex flex-col items-center justify-center gap-0.5 text-sm relative accent-transition"
+                          :class="[
+                            cell.dateStr === selectedDate ? 'btn-accent' : 'glass hover:translate-y-[-1px]',
+                            cell.isToday && cell.dateStr !== selectedDate ? 'border-accent' : ''
+                          ]"
+                          :style="cell.isToday && cell.dateStr !== selectedDate ? { borderWidth: '1.5px' } : {}">
+                    <span :class="cell.dateStr === selectedDate ? 'font-bold' : ''">{{ cell.day }}</span>
+                    <span v-if="cell.taskCount > 0" class="day-dot" :style="cell.dateStr === selectedDate ? {background:'#0a0b0d'} : {}"></span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Focus tips -->
+              <div class="mt-6 glass rounded-2xl p-4">
+                <button @click="tipsExpanded = !tipsExpanded" class="w-full flex items-center justify-between">
+                  <span class="text-sm font-semibold flex items-center gap-2">
+                    <i data-lucide="lightbulb" class="w-4 h-4 accent-transition" style="color:var(--accent)"></i>
+                    Focus Tips
+                  </span>
+                  <i :data-lucide="tipsExpanded ? 'chevron-up' : 'chevron-down'" class="w-4 h-4" style="color:var(--text-tertiary)"></i>
+                </button>
+                <transition name="fade">
+                  <ul v-show="tipsExpanded" class="mt-3 space-y-2 text-[0.8rem] leading-relaxed" style="color:var(--text-secondary)">
+                    <li class="flex gap-2"><i data-lucide="dot" class="w-4 h-4 shrink-0 mt-0.5"></i>Work on a single task per session — multitasking quietly drains the focus a Pomodoro is meant to protect.</li>
+                    <li class="flex gap-2"><i data-lucide="dot" class="w-4 h-4 shrink-0 mt-0.5"></i>Treat breaks as a full disengage, not a slower version of work. Stand up, look away from the screen.</li>
+                    <li class="flex gap-2"><i data-lucide="dot" class="w-4 h-4 shrink-0 mt-0.5"></i>Don't skip the long break after every 4th round — it's what lets you sustain the next cycle.</li>
+                    <li class="flex gap-2"><i data-lucide="dot" class="w-4 h-4 shrink-0 mt-0.5"></i>Break big assignments into 25-minute chunks before you start — momentum comes from small finish lines.</li>
+                  </ul>
+                </transition>
+              </div>
+            </div>
+
+            <!-- Day view -->
+            <div class="md:col-span-2">
+              <div class="glass rounded-2xl p-5 h-full flex flex-col">
+                <h4 class="font-display font-semibold text-sm mb-4">{{ selectedDateLabel }}</h4>
+
+                <form @submit.prevent="addPlannedTask" class="space-y-2.5 mb-4">
+                  <div>
+                    <label class="text-[0.65rem] font-semibold uppercase tracking-wide mb-1 block" style="color:var(--text-tertiary)">Task description</label>
+                    <input v-model="newPlannedText" type="text" placeholder="What do you need to do?" maxlength="140"
+                           class="w-full glass-strong rounded-xl px-3.5 py-2 text-sm outline-none placeholder:opacity-50"
+                           @keydown.enter.prevent="addPlannedTask" />
+                  </div>
+                  <div>
+                    <label class="text-[0.65rem] font-semibold uppercase tracking-wide mb-1 block" style="color:var(--text-tertiary)">Time of task</label>
+                    <div class="flex gap-2">
+                      <input v-model="newPlannedTime" type="text" placeholder="e.g. 5:30 PM – 6:30 PM" maxlength="40"
+                             class="flex-1 glass-strong rounded-xl px-3.5 py-2 text-xs outline-none placeholder:opacity-50 font-mono"
+                             @keydown.enter.prevent="addPlannedTask" />
+                      <button type="submit" class="btn-accent rounded-xl px-3.5 shrink-0" aria-label="Add planned task"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                    </div>
+                  </div>
+                </form>
+
+                <div class="space-y-2 flex-1 overflow-y-auto max-h-[280px] pr-1">
+                  <transition-group name="list">
+                  <div v-for="task in selectedDayTasks" :key="task.id" class="task-card rounded-xl px-3.5 py-2.5">
+                    <div v-if="editingTaskId !== task.id" class="flex items-start gap-2.5">
+                      <button @click="toggleTaskDone(task, $event)"
+                              class="w-4.5 h-4.5 mt-0.5 rounded-full border-2 flex items-center justify-center shrink-0 accent-transition"
+                              :class="task.done ? 'btn-accent border-transparent' : ''"
+                              :style="!task.done ? { borderColor: 'var(--text-tertiary)', width:'18px', height:'18px' } : { width:'18px', height:'18px' }">
+                        <i v-if="task.done" data-lucide="check" class="w-2.5 h-2.5" style="color:#0a0b0d"></i>
+                      </button>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm" :class="{ 'line-through opacity-40': task.done }">{{ task.text }}</p>
+                        <p v-if="task.time" class="text-[0.65rem] font-mono mt-0.5 flex items-center gap-1" style="color:var(--text-tertiary)">
+                          <i data-lucide="clock" class="w-2.5 h-2.5 shrink-0"></i>{{ task.time }}
+                        </p>
+                      </div>
+                      <button @click="startEditTask(task)" class="icon-btn !w-6 !h-6 shrink-0" aria-label="Edit task"><i data-lucide="pencil" class="w-3 h-3"></i></button>
+                      <button @click="deleteTask(task.id)" class="icon-btn !w-6 !h-6 shrink-0" aria-label="Delete task"><i data-lucide="x" class="w-3 h-3"></i></button>
+                    </div>
+                    <form v-else @submit.prevent="saveEditTask(task)" class="space-y-2">
+                      <div>
+                        <label class="text-[0.6rem] font-semibold uppercase tracking-wide mb-1 block" style="color:var(--text-tertiary)">Task description</label>
+                        <input v-model="editText" type="text" class="w-full glass-strong rounded-lg px-3 py-1.5 text-sm outline-none" @keydown.enter.prevent="saveEditTask(task)" />
+                      </div>
+                      <div>
+                        <label class="text-[0.6rem] font-semibold uppercase tracking-wide mb-1 block" style="color:var(--text-tertiary)">Time of task</label>
+                        <input v-model="editTime" type="text" placeholder="e.g. 5:30 PM – 6:30 PM" class="w-full glass-strong rounded-lg px-3 py-1.5 text-xs font-mono outline-none" @keydown.enter.prevent="saveEditTask(task)" />
+                      </div>
+                      <div class="flex gap-2">
+                        <button type="submit" class="btn-accent rounded-lg px-3 py-1 text-xs flex-1">Save</button>
+                        <button type="button" @click="editingTaskId = null" class="btn-ghost rounded-lg px-3 py-1 text-xs flex-1">Cancel</button>
+                      </div>
+                    </form>
+                  </div>
+                  </transition-group>
+                  <div v-if="selectedDayTasks.length === 0" class="text-center py-8" style="color:var(--text-tertiary)">
+                    <i data-lucide="calendar-x" class="w-6 h-6 mx-auto mb-2 opacity-50"></i>
+                    <p class="text-xs">No tasks planned for this day.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== ANALYTICS VIEW ===== -->
+          <div v-else>
+            <h4 class="font-display font-semibold text-base mb-1">Last 7 Days</h4>
+            <p class="text-xs mb-6" style="color:var(--text-tertiary)">Focus sessions completed per day</p>
+
+            <div class="glass rounded-2xl p-6">
+              <div class="flex items-end justify-between gap-2 sm:gap-4 h-48">
+                <div v-for="day in last7DaysStats" :key="day.dateStr" class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+                  <span class="text-xs font-mono font-bold" style="color:var(--text-secondary)">{{ day.count }}</span>
+                  <div class="w-full rounded-t-lg bar-fill accent-transition"
+                       :style="{ height: day.barHeight + '%', background: 'var(--accent)', minHeight: day.count > 0 ? '6px' : '2px', opacity: day.count > 0 ? 1 : 0.18 }"></div>
+                  <span class="text-[0.65rem] font-medium" style="color:var(--text-tertiary)">{{ day.label }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 mt-5">
+              <div class="glass rounded-2xl p-4 text-center">
+                <div class="text-2xl font-bold font-mono">{{ last7Total }}</div>
+                <div class="text-[0.65rem] mt-1" style="color:var(--text-tertiary)">Sessions / 7 days</div>
+              </div>
+              <div class="glass rounded-2xl p-4 text-center">
+                <div class="text-2xl font-bold font-mono">{{ last7Average }}</div>
+                <div class="text-[0.65rem] mt-1" style="color:var(--text-tertiary)">Avg / day</div>
+              </div>
+              <div class="glass rounded-2xl p-4 text-center">
+                <div class="text-2xl font-bold font-mono">{{ totalPomodoros }}</div>
+                <div class="text-[0.65rem] mt-1" style="color:var(--text-tertiary)">All-time total</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </transition>
+
+</div>
+
+<script>
+const { createApp, nextTick } = Vue;
+
+createApp({
+  data(){
+    return {
+      // ---- theme / chrome ----
+      isDark: true,
+      accentHex: '#c9952c',
+      accentOptions: [
+        { name: 'Amber',    hex: '#c9952c' },
+        { name: 'Emerald',  hex: '#4ade80' },
+        { name: 'Sky',      hex: '#38bdf8' },
+        { name: 'Violet',   hex: '#9b7fd1' },
+        { name: 'Rose',     hex: '#e8714a' },
+        { name: 'Crimson',  hex: '#e85d4e' },
+        { name: 'Ice Blue', hex: '#a9cce3' },
+        { name: 'Mono',     hex: '#e5e5e5' },
+      ],
+
+      // ---- timer ----
+      mode: 'pomodoro', // pomodoro | short_break | long_break
+      modes: [
+        { key: 'pomodoro',    label: 'Focus',  icon: 'brain' },
+        { key: 'short_break', label: 'Short',  icon: 'leaf' },
+        { key: 'long_break',  label: 'Long',   icon: 'cloud-moon' },
+      ],
+      modeTabRefs: [],
+      pillRect: null,
+      durations: { pomodoro: 25, short_break: 5, long_break: 15 },
+      secondsLeft: 25 * 60,
+      isRunning: false,
+      timerInterval: null,
+      pomodorosThisCycle: 0, // 0-3, resets after long break
+      totalPomodoros: 0,
+      sessionLog: [], // array of {date: 'YYYY-MM-DD', ts: epoch}
+      soundEnabled: true,
+      audioCtx: null,
+
+      // ---- settings modal ----
+      showSettings: false,
+      durationFields: [
+        { key: 'pomodoro', label: 'Focus length' },
+        { key: 'short_break', label: 'Short break' },
+        { key: 'long_break', label: 'Long break' },
+      ],
+
+      // ---- greeting / quotes ----
+      greeting: '',
+      currentQuote: '',
+      quoteInterval: null,
+      quotePools: {
+        morning: ["A fresh canvas. Let's make it count.", "Conquer the morning, rule the day.", "Coffee is poured. Focus initialized."],
+        afternoon: ["Keep the momentum alive — post-lunch slump who?", "Midday check: drop your shoulders and focus.", "One block at a time, you're building an empire."],
+        evening: ["Wrapping up your day mindfully.", "Finishing strong separates the good from the great.", "The sun sets, but your discipline stays constant."],
+        night: ["Burning the midnight oil, are we?", "Great things are built while the rest of the world sleeps.", "Quiet hours mean deep work. Let's get it.", "Remember to sleep soon — tomorrow needs you sharp."]
+      },
+
+      // ---- break prompts ----
+      currentBreakPrompt: 'Go sip some water.',
+      breakPromptInterval: null,
+      breakPrompts: [
+        "Go sip some water.", "Stretch your legs.", "Take a deep breath.", "Rest your eyes.",
+        "Roll your shoulders back.", "Look at something far away.", "Unclench your jaw.", "Step away from the screen."
+      ],
+
+      // ---- tasks ----
+      tasks: [], // {id, text, date:'YYYY-MM-DD', time:'', done:bool}
+      newTaskText: '',
+      tasksExpanded: true,
+      activeTaskId: null,
+
+      // ---- planner ----
+      showPlanner: false,
+      plannerView: 'calendar',
+      calendarMonth: new Date().getMonth(),
+      calendarYear: new Date().getFullYear(),
+      selectedDate: '',
+      newPlannedText: '',
+      newPlannedTime: '',
+      editingTaskId: null,
+      editText: '',
+      editTime: '',
+      tipsExpanded: false,
+    }
+  },
+
+  computed: {
+    todayStr(){
+      return this.toDateStr(new Date());
+    },
+    modeLabel(){
+      return this.mode === 'pomodoro' ? 'Focus Session' : (this.mode === 'short_break' ? 'Short Break' : 'Long Break');
+    },
+    timeDisplay(){
+      const m = Math.floor(this.secondsLeft / 60).toString().padStart(2,'0');
+      const s = (this.secondsLeft % 60).toString().padStart(2,'0');
+      return m + ':' + s;
+    },
+    ringCircumference(){
+      return 2 * Math.PI * 100;
+    },
+    ringOffset(){
+      const total = this.durations[this.mode] * 60;
+      const progress = total > 0 ? (total - this.secondsLeft) / total : 0;
+      return this.ringCircumference * (1 - progress);
+    },
+    modePillStyle(){
+      const r = this.pillRect;
+      if(!r) return { opacity: 0 };
+      return {
+        transform: `translateX(${r.left}px)`,
+        width: r.width + 'px',
+        background: 'var(--accent)',
+      };
+    },
+    todayTasks(){
+      return this.tasks.filter(t => t.date === this.todayStr).sort((a,b) => (a.done === b.done) ? a.order - b.order : (a.done ? 1 : -1));
+    },
+    todayTaskCount(){
+      return this.todayTasks.filter(t => !t.done).length;
+    },
+    completedTodayCount(){
+      return this.todayTasks.filter(t => t.done).length;
+    },
+    activeTask(){
+      return this.tasks.find(t => t.id === this.activeTaskId) || null;
+    },
+    pomodorosToday(){
+      return this.sessionLog.filter(s => s.date === this.todayStr).length;
+    },
+
+    // ---- calendar ----
+    monthLabel(){
+      const d = new Date(this.calendarYear, this.calendarMonth, 1);
+      return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    },
+    calendarCells(){
+      const firstDay = new Date(this.calendarYear, this.calendarMonth, 1).getDay();
+      const daysInMonth = new Date(this.calendarYear, this.calendarMonth + 1, 0).getDate();
+      const cells = [];
+      for(let i=0; i<firstDay; i++) cells.push(null);
+      const todayStr = this.todayStr;
+      for(let day=1; day<=daysInMonth; day++){
+        const dateStr = this.toDateStr(new Date(this.calendarYear, this.calendarMonth, day));
+        const taskCount = this.tasks.filter(t => t.date === dateStr).length;
+        cells.push({ day, dateStr, isToday: dateStr === todayStr, taskCount });
+      }
+      return cells;
+    },
+    selectedDateLabel(){
+      if(!this.selectedDate) return '';
+      const [y,m,d] = this.selectedDate.split('-').map(Number);
+      const dateObj = new Date(y, m-1, d);
+      const isToday = this.selectedDate === this.todayStr;
+      const label = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+      return isToday ? 'Today · ' + label : label;
+    },
+    selectedDayTasks(){
+      return this.tasks.filter(t => t.date === this.selectedDate).sort((a,b) => (a.done === b.done) ? a.order - b.order : (a.done ? 1 : -1));
+    },
+
+    // ---- analytics ----
+    last7DaysStats(){
+      const days = [];
+      const maxCount = Math.max(1, ...this.getLast7Counts());
+      for(let i=6; i>=0; i--){
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = this.toDateStr(d);
+        const count = this.sessionLog.filter(s => s.date === dateStr).length;
+        days.push({
+          dateStr,
+          count,
+          label: d.toLocaleDateString('en-US', { weekday: 'short' })[0],
+          barHeight: Math.max(2, Math.round((count / maxCount) * 100))
+        });
+      }
+      return days;
+    },
+    last7Total(){
+      return this.last7DaysStats.reduce((sum, d) => sum + d.count, 0);
+    },
+    last7Average(){
+      const avg = this.last7Total / 7;
+      return avg % 1 === 0 ? avg.toString() : avg.toFixed(1);
+    }
+  },
+
+  methods: {
+    // ===================== UTIL =====================
+    toDateStr(date){
+      const y = date.getFullYear();
+      const m = (date.getMonth()+1).toString().padStart(2,'0');
+      const d = date.getDate().toString().padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    },
+    getLast7Counts(){
+      const counts = [];
+      for(let i=6; i>=0; i--){
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = this.toDateStr(d);
+        counts.push(this.sessionLog.filter(s => s.date === dateStr).length);
+      }
+      return counts;
+    },
+    refreshIcons(){
+      nextTick(() => {
+        if(window.lucide) lucide.createIcons();
+      });
+    },
+
+    // ===================== THEME =====================
+    toggleDark(){
+      this.isDark = !this.isDark;
+      document.documentElement.classList.toggle('light', !this.isDark);
+      this.persist();
+    },
+    hexToRgb(hex){
+      const clean = hex.replace('#','');
+      const r = parseInt(clean.substring(0,2), 16);
+      const g = parseInt(clean.substring(2,4), 16);
+      const b = parseInt(clean.substring(4,6), 16);
+      return `${r},${g},${b}`;
+    },
+    applyAccent(hex){
+      const rgb = this.hexToRgb(hex);
+      const root = document.documentElement;
+      root.style.setProperty('--accent', hex);
+      root.style.setProperty('--accent-rgb', rgb);
+      root.style.setProperty('--accent-soft', `rgba(${rgb},0.16)`);
+      root.style.setProperty('--accent-glow', `rgba(${rgb},0.55)`);
+    },
+    setAccent(c){
+      this.accentHex = c.hex;
+      this.applyAccent(c.hex);
+      this.persist();
+    },
+
+    // ===================== GREETING / QUOTES =====================
+    computeGreeting(){
+      const h = new Date().getHours();
+      if(h >= 5 && h < 12) return { period: 'morning', text: 'Good morning' };
+      if(h >= 12 && h < 17) return { period: 'afternoon', text: 'Good afternoon' };
+      if(h >= 17 && h < 21) return { period: 'evening', text: 'Good evening' };
+      return { period: 'night', text: 'Late night focus' };
+    },
+    rotateQuote(){
+      const { period, text } = this.computeGreeting();
+      this.greeting = text;
+      const pool = this.quotePools[period];
+      let next = pool[Math.floor(Math.random() * pool.length)];
+      // avoid immediate repeat
+      let guard = 0;
+      while(next === this.currentQuote && pool.length > 1 && guard < 10){
+        next = pool[Math.floor(Math.random() * pool.length)];
+        guard++;
+      }
+      this.currentQuote = next;
+    },
+    rotateBreakPrompt(){
+      let next = this.breakPrompts[Math.floor(Math.random() * this.breakPrompts.length)];
+      let guard = 0;
+      while(next === this.currentBreakPrompt && guard < 10){
+        next = this.breakPrompts[Math.floor(Math.random() * this.breakPrompts.length)];
+        guard++;
+      }
+      this.currentBreakPrompt = next;
+    },
+
+    // ===================== AUDIO (Web Audio API, synthesized — no external files) =====================
+    getAudioCtx(){
+      if(!this.audioCtx){
+        const AC = window.AudioContext || window.webkitAudioContext;
+        this.audioCtx = new AC();
+      }
+      if(this.audioCtx.state === 'suspended') this.audioCtx.resume();
+      return this.audioCtx;
+    },
+    playTone(freq, startTime, duration, type='sine', gainPeak=0.18){
+      const ctx = this.getAudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, startTime);
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(gainPeak, startTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + duration + 0.05);
+    },
+    playTimerChime(){
+      // Timer-complete alarm: a clear two-tone chime, repeated exactly 5 times, ~600ms apart, then stops.
+      if(!this.soundEnabled) return;
+      const ctx = this.getAudioCtx();
+      let count = 0;
+      const ring = () => {
+        if(count >= 5) return;
+        const now = ctx.currentTime;
+        this.playTone(880, now, 0.28, 'sine', 0.2);
+        this.playTone(1318.5, now + 0.1, 0.3, 'sine', 0.14);
+        count++;
+      };
+      ring(); // immediate first chime
+      const intervalId = setInterval(() => {
+        if(count >= 5){
+          clearInterval(intervalId);
+          return;
+        }
+        ring();
+        if(count >= 5) clearInterval(intervalId);
+      }, 600);
+    },
+    playSuccessChime(){
+      // Task-complete: crisp multi-tone chord, distinct from timer alarm, single short hit.
+      if(!this.soundEnabled) return;
+      const ctx = this.getAudioCtx();
+      const now = ctx.currentTime;
+      [523.25, 659.25, 783.99].forEach((freq, i) => { // C5 E5 G5 chord
+        this.playTone(freq, now + i*0.015, 0.35, 'triangle', 0.12);
+      });
+    },
+
+    // ===================== TIMER =====================
+    toggleTimer(){
+      this.isRunning ? this.pauseTimer() : this.startTimer();
+    },
+    startTimer(){
+      if(this.isRunning) return;
+      // resume audio context on user gesture (autoplay policies)
+      this.getAudioCtx();
+      this.isRunning = true;
+      this.timerInterval = setInterval(() => {
+        if(this.secondsLeft > 0){
+          this.secondsLeft--;
+        } else {
+          this.completeTimer();
+        }
+      }, 1000);
+      this.refreshIcons();
+    },
+    pauseTimer(){
+      this.isRunning = false;
+      clearInterval(this.timerInterval);
+      this.refreshIcons();
+    },
+    resetTimer(){
+      this.pauseTimer();
+      this.secondsLeft = this.durations[this.mode] * 60;
+      this.refreshIcons();
+    },
+    skipTimer(){
+      this.pauseTimer();
+      this.advanceMode(false);
+    },
+    completeTimer(){
+      this.pauseTimer();
+      this.playTimerChime();
+      this.advanceMode(true);
+    },
+    advanceMode(logSession){
+      if(this.mode === 'pomodoro'){
+        if(logSession){
+          this.totalPomodoros++;
+          this.sessionLog.push({ date: this.todayStr, ts: Date.now() });
+          this.pomodorosThisCycle++;
+        }
+        if(this.pomodorosThisCycle >= 4){
+          this.pomodorosThisCycle = 0;
+          this.switchMode('long_break');
+        } else {
+          this.switchMode('short_break');
+        }
+      } else {
+        this.switchMode('pomodoro');
+      }
+      this.persist();
+    },
+    switchMode(newMode){
+      if(this.mode === newMode && this.secondsLeft === this.durations[newMode]*60) { this.refreshIcons(); return; }
+      this.pauseTimer();
+      this.mode = newMode;
+      this.secondsLeft = this.durations[newMode] * 60;
+      if(newMode !== 'pomodoro') this.rotateBreakPrompt();
+      this.persist();
+      this.refreshIcons();
+      this.measurePill();
+    },
+    measurePill(){
+      nextTick(() => {
+        const idx = this.modes.findIndex(m => m.key === this.mode);
+        const el = this.modeTabRefs[idx];
+        const parent = el && el.parentElement;
+        if(!el || !parent) return;
+        const elRect = el.getBoundingClientRect();
+        const parentRect = parent.getBoundingClientRect();
+        this.pillRect = {
+          left: elRect.left - parentRect.left,
+          width: elRect.width,
+        };
+      });
+    },
+    onDurationChange(){
+      // live-update the ring if the current mode's duration changes and timer isn't running
+      if(!this.isRunning){
+        this.secondsLeft = this.durations[this.mode] * 60;
+      }
+      this.persist();
+    },
+
+    // ===================== SETTINGS / PLANNER MODALS =====================
+    openSettings(){ this.showSettings = true; this.refreshIcons(); },
+    openPlanner(){
+      this.showPlanner = true;
+      this.plannerView = 'calendar';
+      this.calendarMonth = new Date().getMonth();
+      this.calendarYear = new Date().getFullYear();
+      this.selectedDate = this.todayStr;
+      this.refreshIcons();
+    },
+    changeMonth(delta){
+      let m = this.calendarMonth + delta;
+      let y = this.calendarYear;
+      if(m < 0){ m = 11; y--; }
+      if(m > 11){ m = 0; y++; }
+      this.calendarMonth = m;
+      this.calendarYear = y;
+    },
+    selectDay(dateStr){
+      this.selectedDate = dateStr;
+      this.editingTaskId = null;
+    },
+
+    // ===================== TASKS =====================
+    nextOrder(date){
+      const dayTasks = this.tasks.filter(t => t.date === date);
+      return dayTasks.length ? Math.max(...dayTasks.map(t => t.order || 0)) + 1 : 0;
+    },
+    addTask(){
+      const text = this.newTaskText.trim();
+      if(!text) return;
+      this.tasks.push({
+        id: 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+        text, date: this.todayStr, time: '', done: false,
+        order: this.nextOrder(this.todayStr)
+      });
+      this.newTaskText = '';
+      this.persist();
+      this.refreshIcons();
+    },
+    addPlannedTask(){
+      const text = this.newPlannedText.trim();
+      if(!text || !this.selectedDate) return;
+      this.tasks.push({
+        id: 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+        text, date: this.selectedDate, time: this.newPlannedTime.trim(), done: false,
+        order: this.nextOrder(this.selectedDate)
+      });
+      this.newPlannedText = '';
+      this.newPlannedTime = '';
+      this.persist();
+      this.refreshIcons();
+    },
+    setActiveTask(id){
+      this.activeTaskId = this.activeTaskId === id ? null : id;
+    },
+    toggleTaskDone(task, evt){
+      const wasIncomplete = !task.done;
+      task.done = !task.done;
+      if(task.done && wasIncomplete){
+        this.playSuccessChime();
+        this.burstConfetti(evt);
+      }
+      this.persist();
+    },
+    deleteTask(id){
+      this.tasks = this.tasks.filter(t => t.id !== id);
+      if(this.activeTaskId === id) this.activeTaskId = null;
+      this.persist();
+      this.refreshIcons();
+    },
+    startEditTask(task){
+      this.editingTaskId = task.id;
+      this.editText = task.text;
+      this.editTime = task.time;
+    },
+    saveEditTask(task){
+      const text = this.editText.trim();
+      if(text) task.text = text;
+      task.time = this.editTime.trim();
+      this.editingTaskId = null;
+      this.persist();
+      this.refreshIcons();
+    },
+
+    // ===================== CONFETTI / PARTICLE BURST =====================
+    burstConfetti(evt){
+      if(!evt) return;
+      const btn = evt.currentTarget;
+      const card = btn.closest('.task-card');
+      if(!card) return;
+      const rect = btn.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      const originX = rect.left - cardRect.left + rect.width/2;
+      const originY = rect.top - cardRect.top + rect.height/2;
+
+      const colors = ['var(--accent)', '#ffffff', 'var(--accent)'];
+      const count = 10;
+      for(let i=0; i<count; i++){
+        const p = document.createElement('span');
+        p.className = 'particle';
+        const angle = (Math.PI * 2 * i) / count + Math.random()*0.5;
+        const dist = 26 + Math.random()*22;
+        const tx = Math.cos(angle) * dist;
+        const ty = Math.sin(angle) * dist;
+        p.style.setProperty('--tx', tx + 'px');
+        p.style.setProperty('--ty', ty + 'px');
+        p.style.left = originX + 'px';
+        p.style.top = originY + 'px';
+        p.style.background = colors[i % colors.length];
+        card.appendChild(p);
+        setTimeout(() => p.remove(), 750);
+      }
+      btn.classList.add('check-pop');
+      setTimeout(() => btn.classList.remove('check-pop'), 400);
+    },
+
+    // ===================== PERSISTENCE =====================
+    persist(){
+      try{
+        const payload = {
+          isDark: this.isDark,
+          accentHex: this.accentHex,
+          durations: this.durations,
+          soundEnabled: this.soundEnabled,
+          totalPomodoros: this.totalPomodoros,
+          pomodorosThisCycle: this.pomodorosThisCycle,
+          sessionLog: this.sessionLog,
+          tasks: this.tasks,
+          mode: this.mode,
+        };
+        localStorage.setItem('daydone_state_v1', JSON.stringify(payload));
+      }catch(e){ /* localStorage unavailable — fail silently, app still works in-memory */ }
+    },
+    load(){
+      try{
+        const raw = localStorage.getItem('daydone_state_v1');
+        if(!raw) return;
+        const data = JSON.parse(raw);
+        if(typeof data.isDark === 'boolean') this.isDark = data.isDark;
+        if(typeof data.accentHex === 'string') this.accentHex = data.accentHex;
+        if(data.durations) this.durations = Object.assign(this.durations, data.durations);
+        if(typeof data.soundEnabled === 'boolean') this.soundEnabled = data.soundEnabled;
+        if(typeof data.totalPomodoros === 'number') this.totalPomodoros = data.totalPomodoros;
+        if(typeof data.pomodorosThisCycle === 'number') this.pomodorosThisCycle = data.pomodorosThisCycle;
+        if(Array.isArray(data.sessionLog)) this.sessionLog = data.sessionLog;
+        if(Array.isArray(data.tasks)) this.tasks = data.tasks.map(t => ({ order: 0, time: '', ...t }));
+        if(data.mode) this.mode = data.mode;
+      }catch(e){ /* corrupt or unavailable storage — start fresh */ }
+    }
+  },
+
+  created(){
+    this.load();
+    this.selectedDate = this.todayStr;
+    document.documentElement.classList.toggle('light', !this.isDark);
+  },
+
+  mounted(){
+    // apply the user's saved (or default) accent color — single accent across all modes
+    this.applyAccent(this.accentHex);
+
+    this.rotateQuote();
+    this.quoteInterval = setInterval(this.rotateQuote, 14000);
+
+    if(this.mode !== 'pomodoro') this.rotateBreakPrompt();
+    this.breakPromptInterval = setInterval(() => {
+      if(this.mode !== 'pomodoro') this.rotateBreakPrompt();
+    }, 9000);
+
+    this.refreshIcons();
+    this.measurePill();
+    this._onResize = () => this.measurePill();
+    window.addEventListener('resize', this._onResize);
+  },
+
+  beforeUnmount(){
+    clearInterval(this.timerInterval);
+    clearInterval(this.quoteInterval);
+    clearInterval(this.breakPromptInterval);
+    window.removeEventListener('resize', this._onResize);
+  }
+
+}).mount('#app');
+</script>
+</body>
+</html>
