@@ -666,7 +666,7 @@
           <transition name="fade">
             <div v-if="customizeOpenFor===key" class="px-3 pb-3 pt-1 space-y-3">
 
-              <div class="flex items-center justify-between">
+              <div v-if="key !== 'black'" class="flex items-center justify-between">
                 <span class="text-[0.7rem]" style="color:var(--text-secondary)">{{ themeSettings[key].dark ? 'Dark mode' : 'Bright mode' }}</span>
                 <button @click="toggleThemeDark(key)" class="toggle-track" :style="{ background: themeSettings[key].dark ? 'var(--accent)' : 'var(--glass-border)' }">
                   <div class="toggle-knob" :style="{ left: themeSettings[key].dark ? '19px' : '3px' }"></div>
@@ -712,8 +712,8 @@ const THEMES = {
   },
   academia: {
     name: 'Dark Academia', accent: '#c9952c',
-    dark:   { bg:'linear-gradient(160deg,#1c130d 0%,#3b2a1d 45%,#241a12 100%)', text:'#f1e3cd', textSec:'rgba(241,227,205,0.62)', textTer:'rgba(241,227,205,0.4)', glass:'rgba(58,42,30,0.5)', glassStrong:'rgba(58,42,30,0.74)', glassBorder:'rgba(201,149,44,0.3)', isLight:false },
-    bright: { bg:'linear-gradient(160deg,#fbf6e9 0%,#f5ecd6 45%,#fdf9ee 100%)', text:'#4a3a1f', textSec:'rgba(74,58,31,0.62)', textTer:'rgba(74,58,31,0.42)', glass:'rgba(255,255,255,0.55)', glassStrong:'rgba(255,255,255,0.78)', glassBorder:'rgba(201,149,44,0.35)', isLight:true },
+    dark:   { bg:'linear-gradient(160deg,#fbf6e9 0%,#f5ecd6 45%,#fdf9ee 100%)', text:'#4a3a1f', textSec:'rgba(74,58,31,0.62)', textTer:'rgba(74,58,31,0.42)', glass:'rgba(255,255,255,0.55)', glassStrong:'rgba(255,255,255,0.78)', glassBorder:'rgba(201,149,44,0.35)', isLight:true },
+    bright: { bg:'linear-gradient(160deg,#1c130d 0%,#3b2a1d 45%,#241a12 100%)', text:'#f1e3cd', textSec:'rgba(241,227,205,0.62)', textTer:'rgba(241,227,205,0.4)', glass:'rgba(58,42,30,0.5)', glassStrong:'rgba(58,42,30,0.74)', glassBorder:'rgba(201,149,44,0.3)', isLight:false },
     wallpaper: 'CLAUDE2.avif',
   },
   seoul: {
@@ -724,8 +724,8 @@ const THEMES = {
   },
   paris: {
     name: 'Rainy Paris', accent: '#a9cce3',
-    dark:   { bg:'linear-gradient(160deg,#46525e 0%,#6b7c8c 50%,#38424c 100%)', text:'#eef2f5', textSec:'rgba(238,242,245,0.62)', textTer:'rgba(238,242,245,0.4)', glass:'rgba(255,255,255,0.1)', glassStrong:'rgba(255,255,255,0.18)', glassBorder:'rgba(255,255,255,0.22)', isLight:false },
-    bright: { bg:'linear-gradient(160deg,#eef2f6 0%,#dde6ee 50%,#f3f6f9 100%)', text:'#2f3b46', textSec:'rgba(47,59,70,0.62)', textTer:'rgba(47,59,70,0.42)', glass:'rgba(255,255,255,0.55)', glassStrong:'rgba(255,255,255,0.78)', glassBorder:'rgba(169,204,227,0.45)', isLight:true },
+    dark:   { bg:'linear-gradient(160deg,#eef2f6 0%,#dde6ee 50%,#f3f6f9 100%)', text:'#2f3b46', textSec:'rgba(47,59,70,0.62)', textTer:'rgba(47,59,70,0.42)', glass:'rgba(255,255,255,0.55)', glassStrong:'rgba(255,255,255,0.78)', glassBorder:'rgba(169,204,227,0.45)', isLight:true },
+    bright: { bg:'linear-gradient(160deg,#46525e 0%,#6b7c8c 50%,#38424c 100%)', text:'#eef2f5', textSec:'rgba(238,242,245,0.62)', textTer:'rgba(238,242,245,0.4)', glass:'rgba(255,255,255,0.1)', glassStrong:'rgba(255,255,255,0.18)', glassBorder:'rgba(255,255,255,0.22)', isLight:false },
     wallpaper: 'CLAUDE4.avif',
   },
   black: {
@@ -1101,16 +1101,13 @@ createApp({
       const ring = () => {
         if(count >= 5) return;
         const now = ctx.currentTime;
-        this.playTone(880, now, 0.28, 'sine', 0.2);
-        this.playTone(1318.5, now + 0.1, 0.3, 'sine', 0.14);
+        [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+          this.playTone(f, now + i * 0.11, 0.42 + i * 0.06, 'triangle', 0.14);
+        });
         count++;
       };
       ring();
-      const intervalId = setInterval(() => {
-        if(count >= 5){ clearInterval(intervalId); return; }
-        ring();
-        if(count >= 5) clearInterval(intervalId);
-      }, 600);
+      const id = setInterval(() => { if(count >= 5){ clearInterval(id); return; } ring(); if(count >= 5) clearInterval(id); }, 1600);
     },
     playSuccessChime(){
       if(!this.soundEnabled) return;
