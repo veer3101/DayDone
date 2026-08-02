@@ -352,11 +352,16 @@
                 </div>
               </div>
 
-              <form @submit.prevent="addTask" class="flex gap-2 mb-4">
-                <input v-model="newTaskText" type="text" placeholder="Add a task for today…" maxlength="140"
-                       class="flex-1 glass-strong rounded-xl px-4 py-2.5 text-sm outline-none placeholder:opacity-50"
+              <form @submit.prevent="addTask" class="space-y-2 mb-4">
+                <input v-model="newTaskText" type="text" placeholder="Task description…" maxlength="140"
+                       class="w-full glass-strong rounded-xl px-4 py-2.5 text-sm outline-none placeholder:opacity-50"
                        :style="{ color: 'var(--text-primary)' }" @keydown.enter.prevent="addTask" />
-                <button type="submit" class="btn-accent rounded-xl px-4 flex items-center justify-center shrink-0" aria-label="Add task" v-html="icon('plus','w-4 h-4')"></button>
+                <div class="flex gap-2">
+                  <input v-model="newTaskTime" type="text" placeholder="Time (e.g. 5:30 PM – 6:30 PM)"
+                         class="flex-1 glass-strong rounded-xl px-4 py-2.5 text-xs font-mono outline-none placeholder:opacity-50"
+                         :style="{ color: 'var(--text-primary)' }" @keydown.enter.prevent="addTask" />
+                  <button type="submit" class="btn-accent rounded-xl px-4 flex items-center justify-center shrink-0" aria-label="Add task" v-html="icon('plus','w-4 h-4')"></button>
+                </div>
               </form>
 
               <div class="space-y-2.5 max-h-[400px] overflow-y-auto pr-1 relative">
@@ -844,6 +849,7 @@ createApp({
 
       tasks: [],
       newTaskText: '',
+      newTaskTime: '',
       tasksExpanded: true,
       activeTaskId: null,
       dragTaskId: null,
@@ -1122,11 +1128,13 @@ createApp({
       if(this.isRunning) return;
       this.getAudioCtx();
       this.isRunning = true;
+      this._timerEndAt = Date.now() + this.secondsLeft * 1000;
       this.timerInterval = setInterval(() => {
-        if(this.secondsLeft > 0){ this.secondsLeft--; } else { this.completeTimer(); }
-      }, 1000);
+        const remaining = Math.round((this._timerEndAt - Date.now()) / 1000);
+        if(remaining > 0){ this.secondsLeft = remaining; } else { this.secondsLeft = 0; this.completeTimer(); }
+      }, 500);
     },
-    pauseTimer(){ this.isRunning = false; clearInterval(this.timerInterval); },
+    pauseTimer(){ this.isRunning = false; clearInterval(this.timerInterval); this._timerEndAt = null; },
     resetTimer(){ this.pauseTimer(); this.secondsLeft = this.durations[this.mode] * 60; },
     skipTimer(){ this.pauseTimer(); this.advanceMode(false); },
     completeTimer(){ this.pauseTimer(); this.playTimerChime(); this.advanceMode(true); },
@@ -1193,8 +1201,9 @@ createApp({
     addTask(){
       const text = this.newTaskText.trim();
       if(!text) return;
-      this.tasks.push({ id: 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), text, date: this.todayStr, time: '', done: false, order: this.nextOrder(this.todayStr) });
+      this.tasks.push({ id: 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), text, date: this.todayStr, time: this.newTaskTime ? this.newTaskTime.trim() : '', done: false, order: this.nextOrder(this.todayStr) });
       this.newTaskText = '';
+      this.newTaskTime = '';
       this.persist();
     },
     addPlannedTask(){
