@@ -372,39 +372,40 @@
                        @dragenter.prevent="onDragEnter(idx)"
                        @dragover.prevent
                        @dragend="onDragEnd"
-                       class="task-card rounded-2xl px-4 py-3 flex items-center gap-2.5 cursor-pointer"
+                       class="task-card rounded-2xl px-4 py-3 cursor-pointer"
                        :class="{ 'active-task': activeTaskId === task.id }"
                        :style="{ opacity: dragTaskId === task.id ? 0.4 : 1 }"
                        @click="setActiveTask(task.id)">
-
-                    <span v-html="icon('gripVertical','w-3.5 h-3.5')" class="opacity-30 cursor-grab shrink-0" style="color:var(--text-tertiary)" @click.stop></span>
-
-                    <button @click.stop="toggleTaskDone(task, $event)"
-                            class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 accent-transition"
-                            :class="task.done ? 'btn-accent border-transparent' : ''"
-                            :style="!task.done ? { borderColor: 'var(--text-tertiary)' } : {}"
-                            :aria-label="task.done ? 'Mark incomplete' : 'Mark complete'">
-                      <span v-if="task.done" v-html="icon('check','w-3 h-3')" style="color:#0a0b0d"></span>
-                    </button>
-
-                    <span class="flex-1 text-sm min-w-0 truncate task-strike" :class="{ 'is-done opacity-40': task.done }">{{ task.text }}</span>
-                    <span v-if="task.time" class="text-[0.65rem] font-mono shrink-0 hidden sm:inline" style="color:var(--text-tertiary)">{{ task.time }}</span>
-
-                    <button @click.stop="editText = task.text; editTime = task.time; showInlineEdit = task.id" class="icon-btn !w-7 !h-7 shrink-0" aria-label="Edit task" v-html="icon('pencil','w-3 h-3')"></button>
-                  
-                    <button @click.stop="deleteTask(task.id)" class="icon-btn !w-7 !h-7 shrink-0" aria-label="Delete task" v-html="icon('x','w-3.5 h-3.5')"></button>                    
-                  </div>
-                  <transition name="fade">
-                    <div v-if="showInlineEdit === task.id" class="glass rounded-2xl px-4 py-3 mt-1 space-y-2">
-                      <input v-model="editText" type="text" placeholder="Task description" class="w-full glass-strong rounded-xl px-3 py-2 text-sm outline-none" @keydown.enter.prevent="saveEditTask(task); showInlineEdit = null" />
-                      <div class="flex gap-2">
-                        <input v-model="editTime" type="text" placeholder="Time (e.g. 5:30 PM)" class="flex-1 glass-strong rounded-xl px-3 py-2 text-xs font-mono outline-none" @keydown.enter.prevent="saveEditTask(task); showInlineEdit = null" />
-                        <button @click.stop="saveEditTask(task); showInlineEdit = null" class="btn-accent rounded-xl px-3 text-xs">Save</button>
-                        <button @click.stop="showInlineEdit = null" class="btn-ghost rounded-xl px-3 text-xs">Cancel</button>
-                      </div>
+              
+                    <div class="flex items-center gap-2.5">
+                      <span v-html="icon('gripVertical','w-3.5 h-3.5')" class="opacity-30 cursor-grab shrink-0" style="color:var(--text-tertiary)" @click.stop></span>
+                      <button @click.stop="toggleTaskDone(task, $event)"
+                              class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 accent-transition"
+                              :class="task.done ? 'btn-accent border-transparent' : ''"
+                              :style="!task.done ? { borderColor: 'var(--text-tertiary)' } : {}"
+                              :aria-label="task.done ? 'Mark incomplete' : 'Mark complete'">
+                        <span v-if="task.done" v-html="icon('check','w-3 h-3')" style="color:#0a0b0d"></span>
+                      </button>
+                      <span class="flex-1 text-sm min-w-0 truncate task-strike" :class="{ 'is-done opacity-40': task.done }">{{ task.text }}</span>
+                      <span v-if="task.time" class="text-[0.65rem] font-mono shrink-0 hidden sm:inline" style="color:var(--text-tertiary)">{{ task.time }}</span>
+                      <button @click.stop="editText = task.text; editTime = task.time; showInlineEdit = (showInlineEdit === task.id ? null : task.id)" class="icon-btn !w-7 !h-7 shrink-0" aria-label="Edit task" v-html="icon('pencil','w-3 h-3')"></button>
+                      <button @click.stop="deleteTask(task.id)" class="icon-btn !w-7 !h-7 shrink-0" aria-label="Delete task" v-html="icon('x','w-3.5 h-3.5')"></button>
                     </div>
-                  </transition>
+              
+                    <transition name="fade">
+                      <div v-if="showInlineEdit === task.id" class="mt-2 space-y-2">
+                        <input v-model="editText" type="text" placeholder="Task description" class="w-full glass-strong rounded-xl px-3 py-2 text-sm outline-none" @keydown.enter.prevent="saveEditTask(task); showInlineEdit = null" />
+                        <div class="flex gap-2">
+                          <input v-model="editTime" type="text" placeholder="Time (e.g. 5:30 PM)" class="flex-1 glass-strong rounded-xl px-3 py-2 text-xs font-mono outline-none" @keydown.enter.prevent="saveEditTask(task); showInlineEdit = null" />
+                          <button @click.stop="saveEditTask(task); showInlineEdit = null" class="btn-accent rounded-xl px-3 text-xs">Save</button>
+                          <button @click.stop="showInlineEdit = null" class="btn-ghost rounded-xl px-3 text-xs">Cancel</button>
+                        </div>
+                      </div>
+                    </transition>
+              
+                  </div>
                 </transition-group>
+              </div>
 
                 <div v-if="todayTasks.length === 0" class="text-center py-10" style="color:var(--text-tertiary)">
                   <span v-html="icon('coffee','w-7 h-7')" class="inline-block mb-2 opacity-50"></span>
