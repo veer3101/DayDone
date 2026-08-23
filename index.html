@@ -297,7 +297,7 @@
 
           <div class="text-xs font-semibold uppercase tracking-[0.2em] mb-1 accent-transition" style="color:var(--accent)">{{ modeLabel }}</div>
           <div class="text-[0.7rem] mb-6 text-center" style="color:var(--text-tertiary)">
-            Round {{ Math.min(pomodorosThisCycle + 1, 4) }} of 4
+            Round {{ Math.min(pomodorosThisCycle + 1, longBreakAfter) }} of {{ longBreakAfter }}
             <span v-if="mode==='pomodoro' && priorityTask"> · {{ priorityTask.text }}</span>
           </div>
 
@@ -314,7 +314,7 @@
           </div>
 
           <div class="flex items-center gap-2.5 mb-6">
-            <span v-for="i in 4" :key="i" class="tally-dot" :class="{filled: i <= pomodorosThisCycle}"></span>
+            <span v-for="i in longBreakAfter" :key="i" class="tally-dot" :class="{filled: i <= pomodorosThisCycle}"></span>
           </div>
 
           <div class="flex items-center gap-3">
@@ -390,8 +390,20 @@
                     <span class="flex-1 text-sm min-w-0 truncate task-strike" :class="{ 'is-done opacity-40': task.done }">{{ task.text }}</span>
                     <span v-if="task.time" class="text-[0.65rem] font-mono shrink-0 hidden sm:inline" style="color:var(--text-tertiary)">{{ task.time }}</span>
 
-                    <button @click.stop="deleteTask(task.id)" class="icon-btn !w-7 !h-7 shrink-0" aria-label="Delete task" v-html="icon('x','w-3.5 h-3.5')"></button>
+                    <button @click.stop="startEditTask(task); showInlineEdit = task.id" class="icon-btn !w-7 !h-7 shrink-0" aria-label="Edit task" v-html="icon('pencil','w-3 h-3')"></button>
+                  
+                    <button @click.stop="deleteTask(task.id)" class="icon-btn !w-7 !h-7 shrink-0" aria-label="Delete task" v-html="icon('x','w-3.5 h-3.5')"></button>                    
                   </div>
+                  <transition name="fade">
+                    <div v-if="showInlineEdit === task.id" class="glass rounded-2xl px-4 py-3 mt-1 space-y-2">
+                      <input v-model="editText" type="text" placeholder="Task description" class="w-full glass-strong rounded-xl px-3 py-2 text-sm outline-none" @keydown.enter.prevent="saveEditTask(task); showInlineEdit = null" />
+                      <div class="flex gap-2">
+                        <input v-model="editTime" type="text" placeholder="Time (e.g. 5:30 PM)" class="flex-1 glass-strong rounded-xl px-3 py-2 text-xs font-mono outline-none" @keydown.enter.prevent="saveEditTask(task); showInlineEdit = null" />
+                        <button @click.stop="saveEditTask(task); showInlineEdit = null" class="btn-accent rounded-xl px-3 text-xs">Save</button>
+                        <button @click.stop="showInlineEdit = null" class="btn-ghost rounded-xl px-3 text-xs">Cancel</button>
+                      </div>
+                    </div>
+                  </transition>
                 </transition-group>
 
                 <div v-if="todayTasks.length === 0" class="text-center py-10" style="color:var(--text-tertiary)">
@@ -439,6 +451,13 @@
               <span>{{ d.label }}</span><span class="font-mono">{{ durations[d.key] }} min</span>
             </label>
             <input type="range" min="1" max="60" v-model.number="durations[d.key]" @input="onDurationChange" class="w-full" />
+          </div>
+          
+          <div>
+            <label class="text-xs font-medium flex justify-between mb-1.5" style="color:var(--text-secondary)">
+              <span>Long break after</span><span class="font-mono">{{ longBreakAfter }} sessions</span>
+            </label>
+            <input type="range" min="1" max="8" v-model.number="longBreakAfter" @input="persist()" class="w-full" />
           </div>
 
           <div class="pt-2 border-t" :style="{borderColor:'var(--glass-border)'}">
@@ -829,6 +848,7 @@ createApp({
         { key: 'short_break', label: 'Short break' },
         { key: 'long_break', label: 'Long break' },
       ],
+      longBreakAfter: 4,
 
       greeting: '',
       currentQuote: '',
@@ -865,6 +885,7 @@ createApp({
       newPlannedText: '',
       newPlannedTime: '',
       editingTaskId: null,
+      showInlineEdit: null,
       editText: '',
       editTime: '',
 
@@ -1145,7 +1166,7 @@ createApp({
           this.sessionLog.push({ date: this.todayStr, ts: Date.now() });
           this.pomodorosThisCycle++;
         }
-        if(this.pomodorosThisCycle >= 4){ this.pomodorosThisCycle = 0; this.switchMode('long_break'); }
+        if(this.pomodorosThisCycle >= this.longBreakAfter){ this.pomodorosThisCycle = 0; this.switchMode('long_break'); }
         else { this.switchMode('short_break'); }
       } else {
         this.switchMode('pomodoro');
@@ -1284,7 +1305,7 @@ createApp({
     persist(){
       const payload = {
         themeKey: this.themeKey, themeSettings: this.themeSettings, durations: this.durations, soundEnabled: this.soundEnabled,
-        totalPomodoros: this.totalPomodoros, pomodorosThisCycle: this.pomodorosThisCycle,
+        totalPomodoros: this.totalPomodoros, pomodorosThisCycle: this.pomodorosThisCycle, longBreakAfter: this.longBreakAfter,
         sessionLog: this.sessionLog, tasks: this.tasks, mode: this.mode,
       };
       try{ localStorage.setItem('daydone_state_v3', JSON.stringify(payload)); }
@@ -1304,6 +1325,7 @@ createApp({
       if(data.durations) this.durations = Object.assign(this.durations, data.durations);
       if(typeof data.soundEnabled === 'boolean') this.soundEnabled = data.soundEnabled;
       if(typeof data.totalPomodoros === 'number') this.totalPomodoros = data.totalPomodoros;
+      if(typeof data.longBreakAfter === 'number') this.longBreakAfter = data.longBreakAfter;
       if(typeof data.pomodorosThisCycle === 'number') this.pomodorosThisCycle = data.pomodorosThisCycle;
       if(Array.isArray(data.sessionLog)) this.sessionLog = data.sessionLog;
       if(Array.isArray(data.tasks)) this.tasks = data.tasks.map(t => ({ order: 0, time: '', ...t }));
