@@ -34,41 +34,24 @@
   }
 
   *{ box-sizing: border-box; }
-
-  html, body{
-    color: var(--text-primary);
-    font-family: 'Inter', system-ui, sans-serif;
-    overscroll-behavior: none;
-  }
-  body{
-    min-height: 100vh;
-    background: var(--bg-base);
-    background-size: 200% 200%;
-    transition: background 0.6s ease-in-out, color .5s ease;
-  }
+  html, body{ color: var(--text-primary); font-family: 'Inter', system-ui, sans-serif; overscroll-behavior: none; }
+  body{ min-height: 100vh; background: var(--bg-base); background-size: 200% 200%; transition: background 0.6s ease-in-out, color .5s ease; }
 
   .font-display{ font-family: 'Sora', 'Inter', system-ui, sans-serif; }
   .font-mono{ font-family: 'JetBrains Mono', monospace; }
 
   .accent-transition{ transition: color .5s ease, background-color .5s ease, border-color .5s ease, box-shadow .5s ease, fill .5s ease; }
-  .text-accent{ color: var(--accent); }
-  .bg-accent{ background-color: var(--accent); }
-  .border-accent{ border-color: var(--accent); }
   .accent-soft-bg{ background-color: var(--accent-soft); }
   .accent-glow-shadow{ box-shadow: 0 0 24px 2px var(--accent-glow); }
 
   .theme-swatch{
-    width: 38px; height: 38px; border-radius: 9999px;
-    border: 2px solid transparent; position: relative;
+    width: 38px; height: 38px; border-radius: 9999px; border: 2px solid transparent; position: relative;
     transition: transform .2s ease, border-color .2s ease; cursor: pointer; flex-shrink:0;
     background-size: cover; background-position: center;
   }
   .theme-swatch:hover{ transform: scale(1.08); }
   .theme-swatch.selected{ border-color: var(--text-primary); }
-  .theme-swatch.selected::after{
-    content:''; position:absolute; inset:-5px; border-radius:9999px;
-    border:1.5px solid var(--text-primary); opacity:.5;
-  }
+  .theme-swatch.selected::after{ content:''; position:absolute; inset:-5px; border-radius:9999px; border:1.5px solid var(--text-primary); opacity:.5; }
 
   .colour-swatch{
     width: 30px; height: 30px; border-radius: 9999px; border: 2px solid transparent;
@@ -76,11 +59,8 @@
   }
   .colour-swatch:hover{ transform: scale(1.1); }
   .colour-swatch.selected{ border-color: var(--text-primary); }
-  .colour-swatch.selected::after{
-    content:''; position:absolute; inset:-4px; border-radius:9999px; border:1.5px solid var(--text-primary); opacity:.6;
-  }
+  .colour-swatch.selected::after{ content:''; position:absolute; inset:-4px; border-radius:9999px; border:1.5px solid var(--text-primary); opacity:.6; }
 
-  /* Wallpaper layer: sits above body background, below ambient glow + glass content */
   .wallpaper-layer{
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background-size: cover; background-position: center;
@@ -90,19 +70,12 @@
   }
   .wallpaper-scrim{
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background: var(--bg-base);
-    opacity: 0.28;
+    background: var(--bg-base); opacity: 0.28;
     transition: opacity .6s ease, background .6s ease;
   }
 
-  .ambient-glow{
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    opacity: var(--orb-opacity); transition: opacity .6s ease;
-  }
-  .ambient-glow::before, .ambient-glow::after{
-    content: ''; position: absolute; border-radius: 9999px; filter: blur(120px);
-    transition: background-color .6s ease;
-  }
+  .ambient-glow{ position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: var(--orb-opacity); transition: opacity .6s ease; }
+  .ambient-glow::before, .ambient-glow::after{ content: ''; position: absolute; border-radius: 9999px; filter: blur(120px); transition: background-color .6s ease; }
   .ambient-glow::before{ width: 480px; height: 480px; top: -10%; left: -8%; background: var(--accent); opacity: 0.20; }
   .ambient-glow::after{ width: 420px; height: 420px; bottom: -12%; right: -6%; background: var(--accent); opacity: 0.14; }
 
@@ -122,17 +95,11 @@
   ::-webkit-scrollbar-track{ background: transparent; }
   ::-webkit-scrollbar-thumb{ background: var(--glass-border); border-radius: 8px; }
 
-  .icon-btn{
-    width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-    border-radius: 12px; color: var(--text-secondary); transition: all .25s ease; flex-shrink:0;
-  }
+  .icon-btn{ width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 12px; color: var(--text-secondary); transition: all .25s ease; flex-shrink:0; }
   .icon-btn:hover{ color: var(--text-primary); background: var(--glass-bg-strong); transform: translateY(-1px); }
   .icon-btn:active{ transform: translateY(0); }
 
-  .btn-accent{
-    background: var(--accent); color: #0a0b0d; font-weight: 600;
-    transition: background-color .35s ease, transform .15s ease, filter .15s ease;
-  }
+  .btn-accent{ background: var(--accent); color: #0a0b0d; font-weight: 600; transition: background-color .35s ease, transform .15s ease, filter .15s ease; }
   .btn-accent:hover{ filter: brightness(1.08); transform: translateY(-1px); }
   .btn-accent:active{ transform: translateY(0); filter: brightness(0.96); }
 
@@ -146,11 +113,13 @@
     transition: stroke .5s ease, filter .5s ease, stroke-dashoffset 1s linear;
   }
 
+  /* KEY FIX: task-card is block, not flex, and overflow is visible not hidden */
   .task-card{
     border: 1px solid var(--glass-border); background: var(--glass-bg);
     border-left: 3.5px solid transparent;
     transition: border-color .35s ease, background-color .35s ease, transform .15s ease;
-    position: relative; overflow: hidden;
+    position: relative;
+    overflow: visible;
   }
   .task-card:hover{ transform: translateX(2px); }
   .task-card.active-task{ border-color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); }
@@ -184,10 +153,7 @@
   .list-leave-active{ position: absolute; width: 100%; }
 
   .task-strike{ position: relative; }
-  .task-strike::after{
-    content:''; position:absolute; left:0; top:50%; height:1px; background: currentColor;
-    width: 0; transition: width .4s ease;
-  }
+  .task-strike::after{ content:''; position:absolute; left:0; top:50%; height:1px; background: currentColor; width: 0; transition: width .4s ease; }
   .task-strike.is-done::after{ width: 100%; }
 
   .tally-dot{ width:9px; height:9px; border-radius:9999px; border:1.5px solid var(--glass-border); transition: all .4s ease; }
@@ -205,30 +171,17 @@
   .day-dot{ width: 5px; height: 5px; border-radius: 50%; background: var(--accent); transition: background-color .5s ease; }
   .bar-fill{ transition: height .6s cubic-bezier(.2,.8,.2,1), background-color .5s ease; }
 
-  .float-btn{
-    position: fixed; z-index: 40; width:52px; height:52px; border-radius:9999px;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25); transition: all .35s ease-in-out;
-  }
+  .float-btn{ position: fixed; z-index: 40; width:52px; height:52px; border-radius:9999px; display:flex; align-items:center; justify-content:center; box-shadow: 0 8px 24px rgba(0,0,0,0.25); transition: all .35s ease-in-out; }
   .float-btn:hover{ transform: translateY(-2px) scale(1.06); }
   .float-popup{ position: fixed; z-index: 41; }
 
-  .toggle-track{
-    width: 38px; height: 21px; border-radius: 9999px; position: relative; transition: background-color .35s ease; flex-shrink: 0;
-  }
-  .toggle-knob{
-    width: 15px; height: 15px; border-radius: 9999px; background: #fff; position: absolute; top: 3px;
-    transition: left .25s cubic-bezier(.4,0,.2,1); box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  }
+  .toggle-track{ width: 38px; height: 21px; border-radius: 9999px; position: relative; transition: background-color .35s ease; flex-shrink: 0; }
+  .toggle-knob{ width: 15px; height: 15px; border-radius: 9999px; background: #fff; position: absolute; top: 3px; transition: left .25s cubic-bezier(.4,0,.2,1); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
   input[type="range"], input[type="checkbox"]{ accent-color: var(--accent); }
-
   button:focus-visible, input:focus-visible, [tabindex]:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
 
-  @media (prefers-reduced-motion: reduce){
-    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
-  }
-
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; } }
   [v-cloak]{ display: none; }
 </style>
 </head>
@@ -241,20 +194,17 @@
 
   <div class="relative z-10 min-h-screen flex flex-col">
 
-    <!-- ===================== HEADER ===================== -->
+    <!-- HEADER -->
     <header class="sticky top-0 z-30 glass border-b" :style="{borderColor:'var(--glass-border)'}">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
-        <div class="flex items-center min-w-0">
-          <div class="min-w-0 leading-tight">
-            <div class="font-display font-extrabold text-xl sm:text-2xl tracking-tight truncate accent-transition" style="color:var(--text-primary)">DayDone</div>
-            <div class="text-[0.65rem] font-medium truncate -mt-0.5" style="color:var(--text-tertiary)">by Veer Singh</div>
-          </div>
+        <div class="min-w-0 leading-tight">
+          <div class="font-display font-extrabold text-xl sm:text-2xl tracking-tight truncate accent-transition" style="color:var(--text-primary)">DayDone</div>
+          <div class="text-[0.65rem] font-medium truncate -mt-0.5" style="color:var(--text-tertiary)">by Veer Singh</div>
         </div>
-
         <div class="flex items-center gap-1 sm:gap-1.5">
           <button @click="openAnalytics" class="icon-btn" title="Analytics" aria-label="Open analytics" v-html="icon('barChart','w-[18px] h-[18px]')"></button>
           <div class="relative">
-            <button @click="openPlanner" class="icon-btn" title="Planner & Schedule" aria-label="Open planner" v-html="icon('calendar','w-[18px] h-[18px]')"></button>
+            <button @click="openPlanner" class="icon-btn" title="Planner" aria-label="Open planner" v-html="icon('calendar','w-[18px] h-[18px]')"></button>
             <span v-if="todayTaskCount > 0"
                   class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center accent-transition pointer-events-none"
                   :style="{ background:'var(--accent)', color:'#0a0b0d' }">{{ todayTaskCount > 9 ? '9+' : todayTaskCount }}</span>
@@ -264,7 +214,7 @@
       </div>
     </header>
 
-    <!-- ===================== MAIN ===================== -->
+    <!-- MAIN -->
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10">
 
       <div class="text-center mb-6 h-10 flex items-center justify-center">
@@ -292,9 +242,8 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
 
-        <!-- ---------- Timer Card ---------- -->
+        <!-- Timer Card -->
         <div class="lg:col-span-2 glass rounded-3xl p-6 sm:p-8 flex flex-col items-center fade-slide-in">
-
           <div class="text-xs font-semibold uppercase tracking-[0.2em] mb-1 accent-transition" style="color:var(--accent)">{{ modeLabel }}</div>
           <div class="text-[0.7rem] mb-6 text-center" style="color:var(--text-tertiary)">
             Round {{ Math.min(pomodorosThisCycle + 1, longBreakAfter) }} of {{ longBreakAfter }}
@@ -318,22 +267,20 @@
           </div>
 
           <div class="flex items-center gap-3">
-            <button @click="resetTimer" class="icon-btn btn-ghost rounded-full" title="Reset" aria-label="Reset timer" v-html="icon('rotateCcw','w-4 h-4')"></button>
+            <button @click="resetTimer" class="icon-btn btn-ghost rounded-full" title="Reset" v-html="icon('rotateCcw','w-4 h-4')"></button>
             <button @click="toggleTimer"
                     class="btn-accent w-16 h-16 rounded-full flex items-center justify-center accent-glow-shadow"
                     :class="{ 'running-pulse': isRunning }"
-                    :aria-label="isRunning ? 'Pause timer' : 'Start timer'"
                     v-html="icon(isRunning ? 'pause' : 'play', 'w-7 h-7' + (!isRunning ? ' ml-0.5' : ''))"></button>
-            <button @click="skipTimer" class="icon-btn btn-ghost rounded-full" title="Skip" aria-label="Skip to next" v-html="icon('skipForward','w-4 h-4')"></button>
+            <button @click="skipTimer" class="icon-btn btn-ghost rounded-full" title="Skip" v-html="icon('skipForward','w-4 h-4')"></button>
           </div>
         </div>
 
-        <!-- ---------- Right panel: Tasks (Pomodoro) OR Break message (Break modes) ---------- -->
+        <!-- Right Panel -->
         <div class="lg:col-span-3">
-
           <div v-if="mode === 'pomodoro'" class="glass rounded-3xl p-5 sm:p-7 fade-slide-in">
             <div class="flex items-center justify-between mb-1">
-              <button @click="tasksExpanded = !tasksExpanded" class="flex items-center gap-2 group">
+              <button @click="tasksExpanded = !tasksExpanded" class="flex items-center gap-2">
                 <span v-html="icon('listChecks','w-[18px] h-[18px]')" style="color:var(--accent)"></span>
                 <h2 class="font-display font-bold text-lg tracking-wide">Tasks</h2>
                 <span v-html="icon(tasksExpanded ? 'chevronUp' : 'chevronDown','w-4 h-4')" style="color:var(--text-tertiary)"></span>
@@ -360,11 +307,11 @@
                   <input v-model="newTaskTime" type="text" placeholder="Time (e.g. 5:30 PM – 6:30 PM)"
                          class="flex-1 glass-strong rounded-xl px-4 py-2.5 text-xs font-mono outline-none placeholder:opacity-50"
                          :style="{ color: 'var(--text-primary)' }" @keydown.enter.prevent="addTask" />
-                  <button type="submit" class="btn-accent rounded-xl px-4 flex items-center justify-center shrink-0" aria-label="Add task" v-html="icon('plus','w-4 h-4')"></button>
+                  <button type="submit" class="btn-accent rounded-xl px-4 flex items-center justify-center shrink-0" v-html="icon('plus','w-4 h-4')"></button>
                 </div>
               </form>
 
-              <div class="space-y-2.5 max-h-[400px] overflow-y-auto pr-1 relative">
+              <div class="space-y-2 max-h-[400px] overflow-y-auto pr-1">
                 <transition-group name="list">
                   <div v-for="(task, idx) in todayTasks" :key="task.id"
                        draggable="true"
@@ -372,40 +319,45 @@
                        @dragenter.prevent="onDragEnter(idx)"
                        @dragover.prevent
                        @dragend="onDragEnd"
-                       class="task-card rounded-2xl px-4 py-3 cursor-pointer"
+                       class="task-card rounded-2xl px-4 py-3"
                        :class="{ 'active-task': activeTaskId === task.id }"
                        :style="{ opacity: dragTaskId === task.id ? 0.4 : 1 }"
                        @click="setActiveTask(task.id)">
-              
+
+                    <!-- Row: grip / check / text / edit / delete -->
                     <div class="flex items-center gap-2.5">
                       <span v-html="icon('gripVertical','w-3.5 h-3.5')" class="opacity-30 cursor-grab shrink-0" style="color:var(--text-tertiary)" @click.stop></span>
                       <button @click.stop="toggleTaskDone(task, $event)"
                               class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 accent-transition"
                               :class="task.done ? 'btn-accent border-transparent' : ''"
-                              :style="!task.done ? { borderColor: 'var(--text-tertiary)' } : {}"
-                              :aria-label="task.done ? 'Mark incomplete' : 'Mark complete'">
+                              :style="!task.done ? { borderColor: 'var(--text-tertiary)' } : {}">
                         <span v-if="task.done" v-html="icon('check','w-3 h-3')" style="color:#0a0b0d"></span>
                       </button>
                       <span class="flex-1 text-sm min-w-0 truncate task-strike" :class="{ 'is-done opacity-40': task.done }">{{ task.text }}</span>
                       <span v-if="task.time" class="text-[0.65rem] font-mono shrink-0 hidden sm:inline" style="color:var(--text-tertiary)">{{ task.time }}</span>
-                      <button @click.stop="editText = task.text; editTime = task.time; showInlineEdit = (showInlineEdit === task.id ? null : task.id)" class="icon-btn !w-7 !h-7 shrink-0" aria-label="Edit task" v-html="icon('pencil','w-3 h-3')"></button>
+                      <button @click.stop="openInlineEdit(task)" class="icon-btn !w-7 !h-7 shrink-0" aria-label="Edit task" v-html="icon('pencil','w-3 h-3')"></button>
                       <button @click.stop="deleteTask(task.id)" class="icon-btn !w-7 !h-7 shrink-0" aria-label="Delete task" v-html="icon('x','w-3.5 h-3.5')"></button>
                     </div>
-              
-                    <transition name="fade">
-                      <div v-if="showInlineEdit === task.id" class="mt-2 space-y-2">
-                        <input v-model="editText" type="text" placeholder="Task description" class="w-full glass-strong rounded-xl px-3 py-2 text-sm outline-none" @keydown.enter.prevent="saveEditTask(task); showInlineEdit = null" />
-                        <div class="flex gap-2">
-                          <input v-model="editTime" type="text" placeholder="Time (e.g. 5:30 PM)" class="flex-1 glass-strong rounded-xl px-3 py-2 text-xs font-mono outline-none" @keydown.enter.prevent="saveEditTask(task); showInlineEdit = null" />
-                          <button @click.stop="saveEditTask(task); showInlineEdit = null" class="btn-accent rounded-xl px-3 text-xs">Save</button>
-                          <button @click.stop="showInlineEdit = null" class="btn-ghost rounded-xl px-3 text-xs">Cancel</button>
-                        </div>
+
+                    <!-- Inline edit form — expands below the row inside the same card -->
+                    <div v-if="showInlineEdit === task.id" class="mt-3 pt-3 space-y-2" :style="{borderTop:'1px solid var(--glass-border)'}">
+                      <input v-model="editText" type="text" placeholder="Task description"
+                             class="w-full glass-strong rounded-xl px-3 py-2 text-sm outline-none"
+                             :style="{ color: 'var(--text-primary)' }"
+                             @click.stop
+                             @keydown.enter.prevent="saveInlineEdit(task)" />
+                      <div class="flex gap-2" @click.stop>
+                        <input v-model="editTime" type="text" placeholder="Time (e.g. 5:30 PM)"
+                               class="flex-1 glass-strong rounded-xl px-3 py-2 text-xs font-mono outline-none"
+                               :style="{ color: 'var(--text-primary)' }"
+                               @keydown.enter.prevent="saveInlineEdit(task)" />
+                        <button @click.stop="saveInlineEdit(task)" class="btn-accent rounded-xl px-3 text-xs shrink-0">Save</button>
+                        <button @click.stop="showInlineEdit = null" class="btn-ghost rounded-xl px-3 text-xs shrink-0">Cancel</button>
                       </div>
-                    </transition>
-              
+                    </div>
+
                   </div>
                 </transition-group>
-              </div>
 
                 <div v-if="todayTasks.length === 0" class="text-center py-10" style="color:var(--text-tertiary)">
                   <span v-html="icon('coffee','w-7 h-7')" class="inline-block mb-2 opacity-50"></span>
@@ -425,7 +377,6 @@
             </transition>
             <p class="text-sm mt-3" style="color:var(--text-tertiary)">{{ mode === 'short_break' ? 'A short pause keeps your focus sharp.' : "You've earned a real reset — step away fully." }}</p>
           </div>
-
         </div>
       </div>
     </main>
@@ -435,7 +386,7 @@
     </footer>
   </div>
 
-  <!-- ===================== SETTINGS MODAL ===================== -->
+  <!-- SETTINGS MODAL -->
   <transition name="modal">
     <div v-if="showSettings" class="fixed inset-0 z-50 flex items-center justify-center p-4 overlay-backdrop" @click.self="showSettings = false">
       <div class="modal-panel glass-strong rounded-3xl p-6 sm:p-7 w-full max-w-sm">
@@ -443,9 +394,8 @@
           <h3 class="font-display font-bold text-lg flex items-center gap-2 tracking-wide">
             <span v-html="icon('sliders','w-[18px] h-[18px]')"></span> Settings
           </h3>
-          <button @click="showSettings = false" class="icon-btn" aria-label="Close settings" v-html="icon('x','w-4 h-4')"></button>
+          <button @click="showSettings = false" class="icon-btn" v-html="icon('x','w-4 h-4')"></button>
         </div>
-
         <form @submit.prevent="showSettings = false" class="space-y-4">
           <div v-for="d in durationFields" :key="d.key">
             <label class="text-xs font-medium flex justify-between mb-1.5" style="color:var(--text-secondary)">
@@ -453,14 +403,12 @@
             </label>
             <input type="range" min="1" max="60" v-model.number="durations[d.key]" @input="onDurationChange" class="w-full" />
           </div>
-          
           <div>
             <label class="text-xs font-medium flex justify-between mb-1.5" style="color:var(--text-secondary)">
               <span>Long break after</span><span class="font-mono">{{ longBreakAfter }} sessions</span>
             </label>
             <input type="range" min="1" max="8" v-model.number="longBreakAfter" @input="persist()" class="w-full" />
           </div>
-
           <div class="pt-2 border-t" :style="{borderColor:'var(--glass-border)'}">
             <label class="text-xs font-medium mb-1.5 block" style="color:var(--text-secondary)">Sound</label>
             <button type="button" @click="soundEnabled = !soundEnabled; persist()" class="w-full flex items-center justify-between glass rounded-xl px-4 py-2.5">
@@ -472,27 +420,23 @@
               </div>
             </button>
           </div>
-
           <button type="submit" class="btn-accent w-full rounded-xl py-2.5 text-sm mt-2">Done</button>
         </form>
       </div>
     </div>
   </transition>
 
-  <!-- ===================== ANALYTICS MODAL ===================== -->
+  <!-- ANALYTICS MODAL -->
   <transition name="modal">
     <div v-if="showAnalytics" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overlay-backdrop" @click.self="showAnalytics = false">
       <div class="modal-panel glass-strong rounded-3xl w-full max-w-3xl max-h-[92vh] overflow-y-auto">
-
         <div class="sticky top-0 z-10 glass-strong px-5 sm:px-7 py-4 flex items-center justify-between border-b" :style="{borderColor:'var(--glass-border)'}">
           <h3 class="font-display font-bold text-lg flex items-center gap-2 tracking-wide">
             <span v-html="icon('barChart','w-5 h-5')" style="color:var(--accent)"></span>Analytics
           </h3>
-          <button @click="showAnalytics = false" class="icon-btn" aria-label="Close analytics" v-html="icon('x','w-4 h-4')"></button>
+          <button @click="showAnalytics = false" class="icon-btn" v-html="icon('x','w-4 h-4')"></button>
         </div>
-
         <div class="p-5 sm:p-7">
-
           <div class="grid grid-cols-3 gap-3 mb-6">
             <div class="glass rounded-2xl p-4 text-center">
               <div class="text-2xl sm:text-3xl font-bold font-mono">{{ pomodorosToday }}</div>
@@ -507,10 +451,8 @@
               <div class="text-[0.65rem] mt-1" style="color:var(--text-tertiary)">All-time total</div>
             </div>
           </div>
-
           <h4 class="font-display font-semibold text-base mb-1 tracking-wide">Last 7 Days</h4>
           <p class="text-xs mb-5" style="color:var(--text-tertiary)">Focus sessions completed per day</p>
-
           <div class="glass rounded-2xl p-6">
             <div class="flex items-end justify-between gap-2 sm:gap-4 h-48">
               <div v-for="day in last7DaysStats" :key="day.dateStr" class="flex-1 flex flex-col items-center justify-end h-full gap-2">
@@ -521,7 +463,6 @@
               </div>
             </div>
           </div>
-
           <div class="grid grid-cols-2 gap-3 mt-4">
             <div class="glass rounded-2xl p-4 text-center">
               <div class="text-xl font-bold font-mono">{{ last7Total }}</div>
@@ -532,7 +473,6 @@
               <div class="text-[0.65rem] mt-1" style="color:var(--text-tertiary)">Avg / day</div>
             </div>
           </div>
-
           <div class="mt-6 glass rounded-2xl p-4">
             <button @click="tipsExpanded = !tipsExpanded" class="w-full flex items-center justify-between">
               <span class="text-sm font-semibold flex items-center gap-2">
@@ -549,39 +489,32 @@
               </ul>
             </transition>
           </div>
-
         </div>
       </div>
     </div>
   </transition>
 
-  <!-- ===================== PLANNER MODAL ===================== -->
+  <!-- PLANNER MODAL -->
   <transition name="modal">
     <div v-if="showPlanner" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overlay-backdrop" @click.self="showPlanner = false">
       <div class="modal-panel glass-strong rounded-3xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
-
         <div class="sticky top-0 z-10 glass-strong px-5 sm:px-7 py-4 flex items-center justify-between border-b" :style="{borderColor:'var(--glass-border)'}">
           <h3 class="font-display font-bold text-lg flex items-center gap-2 tracking-wide">
             <span v-html="icon('calendar','w-5 h-5')" style="color:var(--accent)"></span>Planner & Schedule
           </h3>
-          <button @click="showPlanner = false" class="icon-btn" aria-label="Close planner" v-html="icon('x','w-4 h-4')"></button>
+          <button @click="showPlanner = false" class="icon-btn" v-html="icon('x','w-4 h-4')"></button>
         </div>
-
         <div class="p-5 sm:p-7">
-
           <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
-
             <div class="md:col-span-3">
               <div class="flex items-center justify-between mb-4">
-                <button @click="changeMonth(-1)" class="icon-btn" aria-label="Previous month" v-html="icon('chevronLeft','w-4 h-4')"></button>
+                <button @click="changeMonth(-1)" class="icon-btn" v-html="icon('chevronLeft','w-4 h-4')"></button>
                 <h4 class="font-display font-semibold text-base tracking-wide">{{ monthLabel }}</h4>
-                <button @click="changeMonth(1)" class="icon-btn" aria-label="Next month" v-html="icon('chevronRight','w-4 h-4')"></button>
+                <button @click="changeMonth(1)" class="icon-btn" v-html="icon('chevronRight','w-4 h-4')"></button>
               </div>
-
               <div class="grid grid-cols-7 gap-1.5 mb-1.5">
                 <div v-for="(d,i) in ['S','M','T','W','T','F','S']" :key="i" class="text-center text-[0.65rem] font-bold py-1" style="color:var(--text-tertiary)">{{ d }}</div>
               </div>
-
               <div class="grid grid-cols-7 gap-1.5">
                 <div v-for="(cell, i) in calendarCells" :key="i" class="aspect-square">
                   <button v-if="cell" @click="selectDay(cell.dateStr)"
@@ -594,11 +527,9 @@
                 </div>
               </div>
             </div>
-
             <div class="md:col-span-2">
               <div class="glass rounded-2xl p-5 h-full flex flex-col">
                 <h4 class="font-display font-semibold text-sm mb-4 tracking-wide">{{ selectedDateLabel }}</h4>
-
                 <form @submit.prevent="addPlannedTask" class="space-y-2.5 mb-4">
                   <div>
                     <label class="text-[0.65rem] font-semibold uppercase tracking-wide mb-1 block" style="color:var(--text-tertiary)">Task description</label>
@@ -612,45 +543,44 @@
                       <input v-model="newPlannedTime" type="text" placeholder="e.g. 5:30 PM – 6:30 PM" maxlength="40"
                              class="flex-1 glass-strong rounded-xl px-3.5 py-2 text-xs outline-none placeholder:opacity-50 font-mono"
                              @keydown.enter.prevent="addPlannedTask" />
-                      <button type="submit" class="btn-accent rounded-xl px-3.5 shrink-0" aria-label="Add planned task" v-html="icon('plus','w-4 h-4')"></button>
+                      <button type="submit" class="btn-accent rounded-xl px-3.5 shrink-0" v-html="icon('plus','w-4 h-4')"></button>
                     </div>
                   </div>
                 </form>
-
                 <div class="space-y-2 flex-1 overflow-y-auto max-h-[280px] pr-1">
                   <transition-group name="list">
-                  <div v-for="task in selectedDayTasks" :key="task.id" class="task-card rounded-xl px-3.5 py-2.5">
-                    <div v-if="editingTaskId !== task.id" class="flex items-start gap-2.5">
-                      <button @click="toggleTaskDone(task, $event)"
-                              class="rounded-full border-2 flex items-center justify-center shrink-0 accent-transition mt-0.5"
-                              :class="task.done ? 'btn-accent border-transparent' : ''"
-                              :style="{ width:'18px', height:'18px', borderColor: !task.done ? 'var(--text-tertiary)' : 'transparent' }">
-                        <span v-if="task.done" v-html="icon('check','w-2.5 h-2.5')" style="color:#0a0b0d"></span>
-                      </button>
-                      <div class="flex-1 min-w-0">
-                        <p class="text-sm task-strike" :class="{ 'is-done opacity-40': task.done }">{{ task.text }}</p>
-                        <p v-if="task.time" class="text-[0.65rem] font-mono mt-0.5 flex items-center gap-1" style="color:var(--text-tertiary)">
-                          <span v-html="icon('clock','w-2.5 h-2.5')" class="shrink-0"></span>{{ task.time }}
-                        </p>
+                    <div v-for="task in selectedDayTasks" :key="task.id" class="task-card rounded-xl px-3.5 py-2.5">
+                      <div v-if="editingTaskId !== task.id" class="flex items-start gap-2.5">
+                        <button @click="toggleTaskDone(task, $event)"
+                                class="rounded-full border-2 flex items-center justify-center shrink-0 accent-transition mt-0.5"
+                                :class="task.done ? 'btn-accent border-transparent' : ''"
+                                :style="{ width:'18px', height:'18px', borderColor: !task.done ? 'var(--text-tertiary)' : 'transparent' }">
+                          <span v-if="task.done" v-html="icon('check','w-2.5 h-2.5')" style="color:#0a0b0d"></span>
+                        </button>
+                        <div class="flex-1 min-w-0">
+                          <p class="text-sm task-strike" :class="{ 'is-done opacity-40': task.done }">{{ task.text }}</p>
+                          <p v-if="task.time" class="text-[0.65rem] font-mono mt-0.5 flex items-center gap-1" style="color:var(--text-tertiary)">
+                            <span v-html="icon('clock','w-2.5 h-2.5')" class="shrink-0"></span>{{ task.time }}
+                          </p>
+                        </div>
+                        <button @click="startEditTask(task)" class="icon-btn !w-6 !h-6 shrink-0" v-html="icon('pencil','w-3 h-3')"></button>
+                        <button @click="deleteTask(task.id)" class="icon-btn !w-6 !h-6 shrink-0" v-html="icon('x','w-3 h-3')"></button>
                       </div>
-                      <button @click="startEditTask(task)" class="icon-btn !w-6 !h-6 shrink-0" aria-label="Edit task" v-html="icon('pencil','w-3 h-3')"></button>
-                      <button @click="deleteTask(task.id)" class="icon-btn !w-6 !h-6 shrink-0" aria-label="Delete task" v-html="icon('x','w-3 h-3')"></button>
+                      <form v-else @submit.prevent="saveEditTask(task)" class="space-y-2">
+                        <div>
+                          <label class="text-[0.6rem] font-semibold uppercase tracking-wide mb-1 block" style="color:var(--text-tertiary)">Task description</label>
+                          <input v-model="editText" type="text" class="w-full glass-strong rounded-lg px-3 py-1.5 text-sm outline-none" @keydown.enter.prevent="saveEditTask(task)" />
+                        </div>
+                        <div>
+                          <label class="text-[0.6rem] font-semibold uppercase tracking-wide mb-1 block" style="color:var(--text-tertiary)">Time</label>
+                          <input v-model="editTime" type="text" placeholder="e.g. 5:30 PM – 6:30 PM" class="w-full glass-strong rounded-lg px-3 py-1.5 text-xs font-mono outline-none" @keydown.enter.prevent="saveEditTask(task)" />
+                        </div>
+                        <div class="flex gap-2">
+                          <button type="submit" class="btn-accent rounded-lg px-3 py-1 text-xs flex-1">Save</button>
+                          <button type="button" @click="editingTaskId = null" class="btn-ghost rounded-lg px-3 py-1 text-xs flex-1">Cancel</button>
+                        </div>
+                      </form>
                     </div>
-                    <form v-else @submit.prevent="saveEditTask(task)" class="space-y-2">
-                      <div>
-                        <label class="text-[0.6rem] font-semibold uppercase tracking-wide mb-1 block" style="color:var(--text-tertiary)">Task description</label>
-                        <input v-model="editText" type="text" class="w-full glass-strong rounded-lg px-3 py-1.5 text-sm outline-none" @keydown.enter.prevent="saveEditTask(task)" />
-                      </div>
-                      <div>
-                        <label class="text-[0.6rem] font-semibold uppercase tracking-wide mb-1 block" style="color:var(--text-tertiary)">Time</label>
-                        <input v-model="editTime" type="text" placeholder="e.g. 5:30 PM – 6:30 PM" class="w-full glass-strong rounded-lg px-3 py-1.5 text-xs font-mono outline-none" @keydown.enter.prevent="saveEditTask(task)" />
-                      </div>
-                      <div class="flex gap-2">
-                        <button type="submit" class="btn-accent rounded-lg px-3 py-1 text-xs flex-1">Save</button>
-                        <button type="button" @click="editingTaskId = null" class="btn-ghost rounded-lg px-3 py-1 text-xs flex-1">Cancel</button>
-                      </div>
-                    </form>
-                  </div>
                   </transition-group>
                   <div v-if="selectedDayTasks.length === 0" class="text-center py-8" style="color:var(--text-tertiary)">
                     <span v-html="icon('calendar','w-6 h-6')" class="inline-block mb-2 opacity-50"></span>
@@ -660,13 +590,12 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
   </transition>
 
-  <!-- ===================== FLOATING: THEME SWITCHER (bottom-right) ===================== -->
+  <!-- FLOATING THEME SWITCHER -->
   <button class="float-btn glass-strong" style="right:20px; bottom:20px;" @click="toggleThemeSwitcher" aria-label="Change theme" v-html="icon('palette','w-5 h-5')"></button>
   <transition name="popup">
     <div v-if="showThemeSwitcher" class="float-popup glass-strong rounded-3xl p-4 w-72" style="right:20px; bottom:84px;">
@@ -690,21 +619,18 @@
           </button>
           <transition name="fade">
             <div v-if="customizeOpenFor===key" class="px-3 pb-3 pt-1 space-y-3">
-
               <div v-if="key !== 'black'" class="flex items-center justify-between">
                 <span class="text-[0.7rem]" style="color:var(--text-secondary)">{{ themeSettings[key].dark ? 'Dark mode' : 'Bright mode' }}</span>
                 <button @click="toggleThemeDark(key)" class="toggle-track" :style="{ background: themeSettings[key].dark ? 'var(--accent)' : 'var(--glass-border)' }">
                   <div class="toggle-knob" :style="{ left: themeSettings[key].dark ? '19px' : '3px' }"></div>
                 </button>
               </div>
-
               <div v-if="THEMES[key].wallpaper" class="flex items-center justify-between">
                 <span class="text-[0.7rem]" style="color:var(--text-secondary)">Show wallpaper</span>
                 <button @click="toggleThemeWallpaper(key)" class="toggle-track" :style="{ background: themeSettings[key].wallpaper ? 'var(--accent)' : 'var(--glass-border)' }">
                   <div class="toggle-knob" :style="{ left: themeSettings[key].wallpaper ? '19px' : '3px' }"></div>
                 </button>
               </div>
-
               <div v-if="key==='black'">
                 <span class="text-[0.7rem] block mb-2" style="color:var(--text-secondary)">Accent colour</span>
                 <div class="flex flex-wrap gap-2">
@@ -713,7 +639,6 @@
                           :style="{ background: c.value }" :title="c.name"></button>
                 </div>
               </div>
-
             </div>
           </transition>
         </div>
@@ -726,8 +651,6 @@
 <script>
 const { createApp, nextTick } = Vue;
 
-// Each theme: dark = default (current) palette; bright = lighter-background variant of the SAME accent/scheme.
-// Wallpaper paths are RELATIVE — keep CLAUDE1.avif..CLAUDE4.avif in the same folder as this index.html.
 const THEMES = {
   aura: {
     name: 'Aura Glow', accent: '#9b7fd1',
@@ -762,16 +685,16 @@ const THEMES = {
 };
 
 const BLACK_ACCENTS = [
-  { name: 'White',        value: '#ffffff' },
-  { name: 'Navy Blue',    value: '#3b5d8a' },
-  { name: 'Sky Blue',     value: '#a9cce3' },
-  { name: 'Olive Green',  value: '#7d8c4a' },
-  { name: 'Sage Green',   value: '#9caf88' },
-  { name: 'Rich Green',   value: '#3f6b4f' },
-  { name: 'Terracotta',   value: '#c1654a' },
-  { name: 'Crimson Red',  value: '#a83246' },
-  { name: 'Soft Cream',   value: '#f0e6d3' },
-  { name: 'Mustard',      value: '#c9952c' },
+  { name: 'White',       value: '#ffffff' },
+  { name: 'Navy Blue',   value: '#3b5d8a' },
+  { name: 'Sky Blue',    value: '#a9cce3' },
+  { name: 'Olive Green', value: '#7d8c4a' },
+  { name: 'Sage Green',  value: '#9caf88' },
+  { name: 'Rich Green',  value: '#3f6b4f' },
+  { name: 'Terracotta',  value: '#c1654a' },
+  { name: 'Crimson Red', value: '#a83246' },
+  { name: 'Soft Cream',  value: '#f0e6d3' },
+  { name: 'Mustard',     value: '#c9952c' },
 ];
 
 const ICONS = {
@@ -815,7 +738,6 @@ createApp({
       THEMES,
       blackAccentOptions: BLACK_ACCENTS,
       themeKey: 'academia',
-      // Per-theme: { dark: bool, wallpaper: bool, accent: '#...' (black only) }
       themeSettings: {
         aura:     { dark: false, wallpaper: true },
         academia: { dark: false, wallpaper: true },
@@ -845,9 +767,9 @@ createApp({
 
       showSettings: false,
       durationFields: [
-        { key: 'pomodoro', label: 'Focus length' },
+        { key: 'pomodoro',    label: 'Focus length' },
         { key: 'short_break', label: 'Short break' },
-        { key: 'long_break', label: 'Long break' },
+        { key: 'long_break',  label: 'Long break' },
       ],
       longBreakAfter: 4,
 
@@ -855,18 +777,15 @@ createApp({
       currentQuote: '',
       quoteInterval: null,
       quotePools: {
-        morning: ["A fresh canvas. Let's make it count.", "Conquer the morning, rule the day.", "Coffee is poured. Focus initialized."],
+        morning:   ["A fresh canvas. Let's make it count.", "Conquer the morning, rule the day.", "Coffee is poured. Focus initialized."],
         afternoon: ["Keep the momentum alive — post-lunch slump who?", "Midday check: drop your shoulders and focus.", "One block at a time, you're building an empire."],
-        evening: ["Wrapping up your day mindfully.", "Finishing strong separates the good from the great.", "The sun sets, but your discipline stays constant."],
-        night: ["Burning the midnight oil, are we?", "Great things are built while the rest of the world sleeps.", "Quiet hours mean deep work. Let's get it.", "Remember to sleep soon — tomorrow needs you sharp."]
+        evening:   ["Wrapping up your day mindfully.", "Finishing strong separates the good from the great.", "The sun sets, but your discipline stays constant."],
+        night:     ["Burning the midnight oil, are we?", "Great things are built while the rest of the world sleeps.", "Quiet hours mean deep work. Let's get it.", "Remember to sleep soon — tomorrow needs you sharp."],
       },
 
       currentBreakPrompt: 'Go sip some water.',
       breakPromptInterval: null,
-      breakPrompts: [
-        "Go sip some water.", "Stretch your legs.", "Take a deep breath.", "Rest your eyes.",
-        "Roll your shoulders back.", "Look at something far away.", "Unclench your jaw.", "Step away from the screen."
-      ],
+      breakPrompts: ["Go sip some water.","Stretch your legs.","Take a deep breath.","Rest your eyes.","Roll your shoulders back.","Look at something far away.","Unclench your jaw.","Step away from the screen."],
 
       tasks: [],
       newTaskText: '',
@@ -876,19 +795,24 @@ createApp({
       dragTaskId: null,
       dragOverIndex: null,
 
+      // inline edit on main page — completely separate from calendar edit
+      showInlineEdit: null,
+      inlineEditText: '',
+      inlineEditTime: '',
+
+      // calendar edit
+      editingTaskId: null,
+      editText: '',
+      editTime: '',
+
       showAnalytics: false,
       tipsExpanded: false,
-
       showPlanner: false,
       calendarMonth: new Date().getMonth(),
       calendarYear: new Date().getFullYear(),
       selectedDate: '',
       newPlannedText: '',
       newPlannedTime: '',
-      editingTaskId: null,
-      showInlineEdit: null,
-      editText: '',
-      editTime: '',
 
       showThemeSwitcher: false,
     }
@@ -896,470 +820,382 @@ createApp({
 
   computed: {
     todayStr(){ return this.toDateStr(new Date()); },
-    modeLabel(){ return this.mode === 'pomodoro' ? 'Focus Session' : (this.mode === 'short_break' ? 'Short Break' : 'Long Break'); },
+    modeLabel(){ return this.mode==='pomodoro' ? 'Focus Session' : (this.mode==='short_break' ? 'Short Break' : 'Long Break'); },
     timeDisplay(){
-      const m = Math.floor(this.secondsLeft / 60).toString().padStart(2,'0');
-      const s = (this.secondsLeft % 60).toString().padStart(2,'0');
-      return m + ':' + s;
+      const m = Math.floor(this.secondsLeft/60).toString().padStart(2,'0');
+      const s = (this.secondsLeft%60).toString().padStart(2,'0');
+      return m+':'+s;
     },
-    ringCircumference(){ return 2 * Math.PI * 100; },
+    ringCircumference(){ return 2*Math.PI*100; },
     ringOffset(){
-      const total = this.durations[this.mode] * 60;
-      const progress = total > 0 ? (total - this.secondsLeft) / total : 0;
-      return this.ringCircumference * (1 - progress);
+      const total = this.durations[this.mode]*60;
+      const progress = total>0 ? (total-this.secondsLeft)/total : 0;
+      return this.ringCircumference*(1-progress);
     },
     modePillStyle(){
       const r = this.pillRect;
-      if(!r) return { opacity: 0 };
-      return { transform: 'translateX(' + r.left + 'px)', width: r.width + 'px', background: 'var(--accent)' };
+      if(!r) return { opacity:0 };
+      return { transform:'translateX('+r.left+'px)', width:r.width+'px', background:'var(--accent)' };
     },
     todayTasks(){
-      return this.tasks.filter(t => t.date === this.todayStr).sort((a,b) => (a.done === b.done) ? a.order - b.order : (a.done ? 1 : -1));
+      return this.tasks.filter(t=>t.date===this.todayStr).sort((a,b)=>(a.done===b.done)?a.order-b.order:(a.done?1:-1));
     },
-    todayTaskCount(){ return this.todayTasks.filter(t => !t.done).length; },
-    completedTodayCount(){ return this.todayTasks.filter(t => t.done).length; },
-    activeTask(){ return this.tasks.find(t => t.id === this.activeTaskId) || null; },
-    priorityTask(){ return this.activeTask || this.todayTasks.find(t => !t.done) || null; },
-    pomodorosToday(){ return this.sessionLog.filter(s => s.date === this.todayStr).length; },
+    todayTaskCount(){ return this.todayTasks.filter(t=>!t.done).length; },
+    completedTodayCount(){ return this.todayTasks.filter(t=>t.done).length; },
+    activeTask(){ return this.tasks.find(t=>t.id===this.activeTaskId)||null; },
+    priorityTask(){ return this.activeTask||this.todayTasks.find(t=>!t.done)||null; },
+    pomodorosToday(){ return this.sessionLog.filter(s=>s.date===this.todayStr).length; },
     currentStreak(){
-      let streak = 0;
-      let d = new Date();
+      let streak=0; let d=new Date();
       for(let i=0;i<365;i++){
-        const dateStr = this.toDateStr(d);
-        const count = this.sessionLog.filter(s => s.date === dateStr).length;
-        if(count > 0){ streak++; d.setDate(d.getDate()-1); } else break;
+        const ds=this.toDateStr(d);
+        if(this.sessionLog.filter(s=>s.date===ds).length>0){ streak++; d.setDate(d.getDate()-1); } else break;
       }
       return streak;
     },
-
     monthLabel(){
-      const d = new Date(this.calendarYear, this.calendarMonth, 1);
-      return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      return new Date(this.calendarYear,this.calendarMonth,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
     },
     calendarCells(){
-      const firstDay = new Date(this.calendarYear, this.calendarMonth, 1).getDay();
-      const daysInMonth = new Date(this.calendarYear, this.calendarMonth + 1, 0).getDate();
-      const cells = [];
-      for(let i=0; i<firstDay; i++) cells.push(null);
-      const todayStr = this.todayStr;
-      for(let day=1; day<=daysInMonth; day++){
-        const dateStr = this.toDateStr(new Date(this.calendarYear, this.calendarMonth, day));
-        const taskCount = this.tasks.filter(t => t.date === dateStr).length;
-        cells.push({ day, dateStr, isToday: dateStr === todayStr, taskCount });
+      const firstDay=new Date(this.calendarYear,this.calendarMonth,1).getDay();
+      const daysInMonth=new Date(this.calendarYear,this.calendarMonth+1,0).getDate();
+      const cells=[];
+      for(let i=0;i<firstDay;i++) cells.push(null);
+      const ts=this.todayStr;
+      for(let day=1;day<=daysInMonth;day++){
+        const ds=this.toDateStr(new Date(this.calendarYear,this.calendarMonth,day));
+        cells.push({day,dateStr:ds,isToday:ds===ts,taskCount:this.tasks.filter(t=>t.date===ds).length});
       }
       return cells;
     },
     selectedDateLabel(){
       if(!this.selectedDate) return '';
-      const parts = this.selectedDate.split('-').map(Number);
-      const dateObj = new Date(parts[0], parts[1]-1, parts[2]);
-      const isToday = this.selectedDate === this.todayStr;
-      const label = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-      return isToday ? 'Today · ' + label : label;
+      const parts=this.selectedDate.split('-').map(Number);
+      const obj=new Date(parts[0],parts[1]-1,parts[2]);
+      const label=obj.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+      return this.selectedDate===this.todayStr ? 'Today · '+label : label;
     },
     selectedDayTasks(){
-      return this.tasks.filter(t => t.date === this.selectedDate).sort((a,b) => (a.done === b.done) ? a.order - b.order : (a.done ? 1 : -1));
+      return this.tasks.filter(t=>t.date===this.selectedDate).sort((a,b)=>(a.done===b.done)?a.order-b.order:(a.done?1:-1));
     },
-
     last7DaysStats(){
-      const counts = this.getLast7Counts();
-      const maxCount = Math.max(1, ...counts);
-      const days = [];
-      for(let i=6; i>=0; i--){
-        const d = new Date(); d.setDate(d.getDate() - i);
-        const dateStr = this.toDateStr(d);
-        const count = this.sessionLog.filter(s => s.date === dateStr).length;
-        days.push({ dateStr, count, label: d.toLocaleDateString('en-US', { weekday: 'short' })[0], barHeight: Math.max(2, Math.round((count / maxCount) * 100)) });
+      const counts=this.getLast7Counts();
+      const maxCount=Math.max(1,...counts);
+      const days=[];
+      for(let i=6;i>=0;i--){
+        const d=new Date(); d.setDate(d.getDate()-i);
+        const ds=this.toDateStr(d);
+        const count=this.sessionLog.filter(s=>s.date===ds).length;
+        days.push({dateStr:ds,count,label:d.toLocaleDateString('en-US',{weekday:'short'})[0],barHeight:Math.max(2,Math.round((count/maxCount)*100))});
       }
       return days;
     },
-    last7Total(){ return this.last7DaysStats.reduce((sum, d) => sum + d.count, 0); },
-    last7Average(){
-      const avg = this.last7Total / 7;
-      return avg % 1 === 0 ? avg.toString() : avg.toFixed(1);
-    },
-
-    currentThemeWallpaperUrl(){
-      const t = THEMES[this.themeKey];
-      return t ? t.wallpaper : null;
-    },
+    last7Total(){ return this.last7DaysStats.reduce((s,d)=>s+d.count,0); },
+    last7Average(){ const a=this.last7Total/7; return a%1===0?a.toString():a.toFixed(1); },
+    currentThemeWallpaperUrl(){ return THEMES[this.themeKey]?.wallpaper||null; },
     showWallpaper(){
-      const s = this.themeSettings[this.themeKey];
-      return !!(s && s.wallpaper && this.currentThemeWallpaperUrl);
+      const s=this.themeSettings[this.themeKey];
+      return !!(s&&s.wallpaper&&this.currentThemeWallpaperUrl);
     },
     wallpaperLayerStyle(){
       return {
-        backgroundImage: this.currentThemeWallpaperUrl ? 'url(' + this.currentThemeWallpaperUrl + ')' : 'none',
+        backgroundImage: this.currentThemeWallpaperUrl ? 'url('+this.currentThemeWallpaperUrl+')' : 'none',
         opacity: this.showWallpaper ? 0.55 : 0,
       };
-    }
+    },
   },
 
   methods: {
-    icon(name, cls){ return svgIcon(name, cls); },
-
+    icon(name,cls){ return svgIcon(name,cls); },
     toDateStr(date){
-      const y = date.getFullYear();
-      const m = (date.getMonth()+1).toString().padStart(2,'0');
-      const d = date.getDate().toString().padStart(2,'0');
-      return y + '-' + m + '-' + d;
+      const y=date.getFullYear();
+      const m=(date.getMonth()+1).toString().padStart(2,'0');
+      const d=date.getDate().toString().padStart(2,'0');
+      return y+'-'+m+'-'+d;
     },
     getLast7Counts(){
-      const counts = [];
-      for(let i=6; i>=0; i--){
-        const d = new Date(); d.setDate(d.getDate() - i);
-        const dateStr = this.toDateStr(d);
-        counts.push(this.sessionLog.filter(s => s.date === dateStr).length);
+      const counts=[];
+      for(let i=6;i>=0;i--){
+        const d=new Date(); d.setDate(d.getDate()-i);
+        counts.push(this.sessionLog.filter(s=>s.date===this.toDateStr(d)).length);
       }
       return counts;
     },
 
-    // ===================== THEME =====================
+    // THEME
     hexToRgb(hex){
-      const clean = hex.replace('#','');
-      const r = parseInt(clean.substring(0,2), 16);
-      const g = parseInt(clean.substring(2,4), 16);
-      const b = parseInt(clean.substring(4,6), 16);
-      return r + ',' + g + ',' + b;
+      const c=hex.replace('#','');
+      return parseInt(c.slice(0,2),16)+','+parseInt(c.slice(2,4),16)+','+parseInt(c.slice(4,6),16);
     },
     swatchStyle(key){
-      const t = THEMES[key];
-      if(t.wallpaper){ return { backgroundImage: 'url(' + t.wallpaper + ')' }; }
-      const variant = this.themeSettings[key].dark ? t.bright : t.dark;
-      return { background: variant.bg };
+      const t=THEMES[key];
+      if(t.wallpaper) return {backgroundImage:'url('+t.wallpaper+')'};
+      const v=this.themeSettings[key].dark?t.bright:t.dark;
+      return {background:v.bg};
     },
     applyTheme(){
-      const key = this.themeKey;
-      const t = THEMES[key];
-      if(!t) return;
-      const settings = this.themeSettings[key];
-      const variant = settings.dark ? t.bright : t.dark;
-      const accentHex = (key === 'black') ? (settings.accent || '#ffffff') : t.accent;
-      const root = document.documentElement;
-      const rgb = this.hexToRgb(accentHex);
-      root.style.setProperty('--accent', accentHex);
-      root.style.setProperty('--accent-rgb', rgb);
-      root.style.setProperty('--accent-soft', 'rgba(' + rgb + ',0.16)');
-      root.style.setProperty('--accent-glow', 'rgba(' + rgb + ',0.55)');
-      root.style.setProperty('--bg-base', variant.bg);
-      root.style.setProperty('--glass-bg', variant.glass);
-      root.style.setProperty('--glass-bg-strong', variant.glassStrong);
-      root.style.setProperty('--glass-border', variant.glassBorder);
-      root.style.setProperty('--text-primary', variant.text);
-      root.style.setProperty('--text-secondary', variant.textSec);
-      root.style.setProperty('--text-tertiary', variant.textTer);
-      root.style.setProperty('--ring-track', variant.isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)');
-      root.style.setProperty('--overlay-bg', variant.isLight ? 'rgba(20,20,30,0.35)' : 'rgba(0,0,0,0.55)');
-      root.style.setProperty('--orb-opacity', variant.isLight ? '0.3' : '0.5');
+      const key=this.themeKey; const t=THEMES[key]; if(!t) return;
+      const s=this.themeSettings[key];
+      const v=s.dark?t.bright:t.dark;
+      const acc=(key==='black')?(s.accent||'#ffffff'):t.accent;
+      const root=document.documentElement;
+      const rgb=this.hexToRgb(acc);
+      root.style.setProperty('--accent',acc);
+      root.style.setProperty('--accent-rgb',rgb);
+      root.style.setProperty('--accent-soft','rgba('+rgb+',0.16)');
+      root.style.setProperty('--accent-glow','rgba('+rgb+',0.55)');
+      root.style.setProperty('--bg-base',v.bg);
+      root.style.setProperty('--glass-bg',v.glass);
+      root.style.setProperty('--glass-bg-strong',v.glassStrong);
+      root.style.setProperty('--glass-border',v.glassBorder);
+      root.style.setProperty('--text-primary',v.text);
+      root.style.setProperty('--text-secondary',v.textSec);
+      root.style.setProperty('--text-tertiary',v.textTer);
+      root.style.setProperty('--ring-track',v.isLight?'rgba(0,0,0,0.08)':'rgba(255,255,255,0.08)');
+      root.style.setProperty('--overlay-bg',v.isLight?'rgba(20,20,30,0.35)':'rgba(0,0,0,0.55)');
+      root.style.setProperty('--orb-opacity',v.isLight?'0.3':'0.5');
     },
-    setTheme(key){
-      this.themeKey = key;
-      this.customizeOpenFor = null;
-      this.applyTheme();
-      this.persist();
-    },
-    toggleThemeDark(key){
-      this.themeSettings[key].dark = !this.themeSettings[key].dark;
-      this.applyTheme();
-      this.persist();
-    },
-    toggleThemeWallpaper(key){
-      this.themeSettings[key].wallpaper = !this.themeSettings[key].wallpaper;
-      this.persist();
-    },
-    setBlackAccent(hex){
-      this.themeSettings.black.accent = hex;
-      if(this.themeKey === 'black') this.applyTheme();
-      this.persist();
-    },
-    toggleThemeSwitcher(){
-      this.showThemeSwitcher = !this.showThemeSwitcher;
-      if(!this.showThemeSwitcher) this.customizeOpenFor = null;
-    },
+    setTheme(key){ this.themeKey=key; this.customizeOpenFor=null; this.applyTheme(); this.persist(); },
+    toggleThemeDark(key){ this.themeSettings[key].dark=!this.themeSettings[key].dark; this.applyTheme(); this.persist(); },
+    toggleThemeWallpaper(key){ this.themeSettings[key].wallpaper=!this.themeSettings[key].wallpaper; this.persist(); },
+    setBlackAccent(hex){ this.themeSettings.black.accent=hex; if(this.themeKey==='black') this.applyTheme(); this.persist(); },
+    toggleThemeSwitcher(){ this.showThemeSwitcher=!this.showThemeSwitcher; if(!this.showThemeSwitcher) this.customizeOpenFor=null; },
 
-    // ===================== GREETING / QUOTES =====================
+    // QUOTES
     computeGreeting(){
-      const h = new Date().getHours();
-      if(h >= 5 && h < 12) return { period: 'morning', text: 'Good morning' };
-      if(h >= 12 && h < 17) return { period: 'afternoon', text: 'Good afternoon' };
-      if(h >= 17 && h < 21) return { period: 'evening', text: 'Good evening' };
-      return { period: 'night', text: 'Late night focus' };
+      const h=new Date().getHours();
+      if(h>=5&&h<12) return {period:'morning',text:'Good morning'};
+      if(h>=12&&h<17) return {period:'afternoon',text:'Good afternoon'};
+      if(h>=17&&h<21) return {period:'evening',text:'Good evening'};
+      return {period:'night',text:'Late night focus'};
     },
     rotateQuote(){
-      const g = this.computeGreeting();
-      this.greeting = g.text;
-      const pool = this.quotePools[g.period];
-      let next = pool[Math.floor(Math.random() * pool.length)];
-      let guard = 0;
-      while(next === this.currentQuote && pool.length > 1 && guard < 10){ next = pool[Math.floor(Math.random() * pool.length)]; guard++; }
-      this.currentQuote = next;
+      const g=this.computeGreeting(); this.greeting=g.text;
+      const pool=this.quotePools[g.period];
+      let next=pool[Math.floor(Math.random()*pool.length)];
+      let guard=0;
+      while(next===this.currentQuote&&pool.length>1&&guard<10){ next=pool[Math.floor(Math.random()*pool.length)]; guard++; }
+      this.currentQuote=next;
     },
     rotateBreakPrompt(){
-      let next = this.breakPrompts[Math.floor(Math.random() * this.breakPrompts.length)];
-      let guard = 0;
-      while(next === this.currentBreakPrompt && guard < 10){ next = this.breakPrompts[Math.floor(Math.random() * this.breakPrompts.length)]; guard++; }
-      this.currentBreakPrompt = next;
+      let next=this.breakPrompts[Math.floor(Math.random()*this.breakPrompts.length)];
+      let guard=0;
+      while(next===this.currentBreakPrompt&&guard<10){ next=this.breakPrompts[Math.floor(Math.random()*this.breakPrompts.length)]; guard++; }
+      this.currentBreakPrompt=next;
     },
 
-    // ===================== AUDIO =====================
+    // AUDIO
     getAudioCtx(){
-      if(!this.audioCtx){
-        const AC = window.AudioContext || window.webkitAudioContext;
-        this.audioCtx = new AC();
-      }
-      if(this.audioCtx.state === 'suspended') this.audioCtx.resume();
+      if(!this.audioCtx){ const AC=window.AudioContext||window.webkitAudioContext; this.audioCtx=new AC(); }
+      if(this.audioCtx.state==='suspended') this.audioCtx.resume();
       return this.audioCtx;
     },
-    playTone(freq, startTime, duration, type, gainPeak){
-      const ctx = this.getAudioCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = type || 'sine';
-      osc.frequency.setValueAtTime(freq, startTime);
-      gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(gainPeak || 0.18, startTime + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+    playTone(freq,startTime,duration,type,gainPeak){
+      const ctx=this.getAudioCtx();
+      const osc=ctx.createOscillator(); const gain=ctx.createGain();
+      osc.type=type||'sine'; osc.frequency.setValueAtTime(freq,startTime);
+      gain.gain.setValueAtTime(0,startTime);
+      gain.gain.linearRampToValueAtTime(gainPeak||0.18,startTime+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001,startTime+duration);
       osc.connect(gain); gain.connect(ctx.destination);
-      osc.start(startTime); osc.stop(startTime + duration + 0.05);
+      osc.start(startTime); osc.stop(startTime+duration+0.05);
     },
     playTimerChime(){
       if(!this.soundEnabled) return;
-      const ctx = this.getAudioCtx();
-      let count = 0;
-      const ring = () => {
-        if(count >= 5) return;
-        const now = ctx.currentTime;
-        [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
-          this.playTone(f, now + i * 0.11, 0.42 + i * 0.06, 'triangle', 0.14);
-        });
+      const ctx=this.getAudioCtx(); let count=0;
+      const ring=()=>{
+        if(count>=5) return;
+        const now=ctx.currentTime;
+        [523.25,659.25,783.99,1046.5].forEach((f,i)=>{ this.playTone(f,now+i*0.11,0.42+i*0.06,'triangle',0.14); });
         count++;
       };
       ring();
-      const id = setInterval(() => { if(count >= 5){ clearInterval(id); return; } ring(); if(count >= 5) clearInterval(id); }, 1600);
+      const id=setInterval(()=>{ if(count>=5){ clearInterval(id); return; } ring(); if(count>=5) clearInterval(id); },1600);
     },
     playSuccessChime(){
       if(!this.soundEnabled) return;
-      const ctx = this.getAudioCtx();
-      const now = ctx.currentTime;
-      [523.25, 659.25, 783.99].forEach((freq, i) => { this.playTone(freq, now + i*0.015, 0.35, 'triangle', 0.12); });
+      const ctx=this.getAudioCtx(); const now=ctx.currentTime;
+      [523.25,659.25,783.99].forEach((freq,i)=>{ this.playTone(freq,now+i*0.015,0.35,'triangle',0.12); });
     },
 
-    // ===================== TIMER =====================
-    toggleTimer(){ this.isRunning ? this.pauseTimer() : this.startTimer(); },
+    // TIMER
+    toggleTimer(){ this.isRunning?this.pauseTimer():this.startTimer(); },
     startTimer(){
       if(this.isRunning) return;
-      this.getAudioCtx();
-      this.isRunning = true;
-      this._timerEndAt = Date.now() + this.secondsLeft * 1000;
-      this.timerInterval = setInterval(() => {
-        const remaining = Math.round((this._timerEndAt - Date.now()) / 1000);
-        if(remaining > 0){ this.secondsLeft = remaining; } else { this.secondsLeft = 0; this.completeTimer(); }
-      }, 500);
+      this.getAudioCtx(); this.isRunning=true;
+      this._timerEndAt=Date.now()+this.secondsLeft*1000;
+      this.timerInterval=setInterval(()=>{
+        const remaining=Math.round((this._timerEndAt-Date.now())/1000);
+        if(remaining>0){ this.secondsLeft=remaining; } else { this.secondsLeft=0; this.completeTimer(); }
+      },500);
     },
-    pauseTimer(){ this.isRunning = false; clearInterval(this.timerInterval); this._timerEndAt = null; },
-    resetTimer(){ this.pauseTimer(); this.secondsLeft = this.durations[this.mode] * 60; },
+    pauseTimer(){ this.isRunning=false; clearInterval(this.timerInterval); this._timerEndAt=null; },
+    resetTimer(){ this.pauseTimer(); this.secondsLeft=this.durations[this.mode]*60; },
     skipTimer(){ this.pauseTimer(); this.advanceMode(false); },
     completeTimer(){ this.pauseTimer(); this.playTimerChime(); this.advanceMode(true); },
     advanceMode(logSession){
-      if(this.mode === 'pomodoro'){
-        if(logSession){
-          this.totalPomodoros++;
-          this.sessionLog.push({ date: this.todayStr, ts: Date.now() });
-          this.pomodorosThisCycle++;
-        }
-        if(this.pomodorosThisCycle >= this.longBreakAfter){ this.pomodorosThisCycle = 0; this.switchMode('long_break'); }
+      if(this.mode==='pomodoro'){
+        if(logSession){ this.totalPomodoros++; this.sessionLog.push({date:this.todayStr,ts:Date.now()}); this.pomodorosThisCycle++; }
+        if(this.pomodorosThisCycle>=this.longBreakAfter){ this.pomodorosThisCycle=0; this.switchMode('long_break'); }
         else { this.switchMode('short_break'); }
-      } else {
-        this.switchMode('pomodoro');
-      }
+      } else { this.switchMode('pomodoro'); }
       this.persist();
     },
     switchMode(newMode){
-      if(this.mode === newMode && this.secondsLeft === this.durations[newMode]*60){ return; }
-      this.pauseTimer();
-      this.mode = newMode;
-      this.secondsLeft = this.durations[newMode] * 60;
-      if(newMode !== 'pomodoro') this.rotateBreakPrompt();
-      this.persist();
-      this.measurePill();
+      if(this.mode===newMode&&this.secondsLeft===this.durations[newMode]*60) return;
+      this.pauseTimer(); this.mode=newMode; this.secondsLeft=this.durations[newMode]*60;
+      if(newMode!=='pomodoro') this.rotateBreakPrompt();
+      this.persist(); this.measurePill();
     },
     measurePill(){
-      nextTick(() => {
-        const idx = this.modes.findIndex(m => m.key === this.mode);
-        const el = this.modeTabRefs[idx];
-        const parent = el && el.parentElement;
-        if(!el || !parent) return;
-        const elRect = el.getBoundingClientRect();
-        const parentRect = parent.getBoundingClientRect();
-        this.pillRect = { left: elRect.left - parentRect.left, width: elRect.width };
+      nextTick(()=>{
+        const idx=this.modes.findIndex(m=>m.key===this.mode);
+        const el=this.modeTabRefs[idx]; const parent=el&&el.parentElement;
+        if(!el||!parent) return;
+        const er=el.getBoundingClientRect(); const pr=parent.getBoundingClientRect();
+        this.pillRect={left:er.left-pr.left,width:er.width};
       });
     },
-    onDurationChange(){
-      if(!this.isRunning) this.secondsLeft = this.durations[this.mode] * 60;
-      this.persist();
-    },
+    onDurationChange(){ if(!this.isRunning) this.secondsLeft=this.durations[this.mode]*60; this.persist(); },
 
-    // ===================== MODALS =====================
-    openSettings(){ this.showSettings = true; },
-    openAnalytics(){ this.showAnalytics = true; this.tipsExpanded = false; },
-    openPlanner(){
-      this.showPlanner = true;
-      this.calendarMonth = new Date().getMonth();
-      this.calendarYear = new Date().getFullYear();
-      this.selectedDate = this.todayStr;
-    },
+    // MODALS
+    openSettings(){ this.showSettings=true; },
+    openAnalytics(){ this.showAnalytics=true; this.tipsExpanded=false; },
+    openPlanner(){ this.showPlanner=true; this.calendarMonth=new Date().getMonth(); this.calendarYear=new Date().getFullYear(); this.selectedDate=this.todayStr; },
     changeMonth(delta){
-      let m = this.calendarMonth + delta, y = this.calendarYear;
-      if(m < 0){ m = 11; y--; } if(m > 11){ m = 0; y++; }
-      this.calendarMonth = m; this.calendarYear = y;
+      let m=this.calendarMonth+delta, y=this.calendarYear;
+      if(m<0){m=11;y--;} if(m>11){m=0;y++;}
+      this.calendarMonth=m; this.calendarYear=y;
     },
-    selectDay(dateStr){ this.selectedDate = dateStr; this.editingTaskId = null; },
+    selectDay(dateStr){ this.selectedDate=dateStr; this.editingTaskId=null; },
 
-    // ===================== TASKS =====================
+    // TASKS
     nextOrder(date){
-      const dayTasks = this.tasks.filter(t => t.date === date);
-      return dayTasks.length ? Math.max(...dayTasks.map(t => t.order || 0)) + 1 : 0;
+      const dt=this.tasks.filter(t=>t.date===date);
+      return dt.length?Math.max(...dt.map(t=>t.order||0))+1:0;
     },
     addTask(){
-      const text = this.newTaskText.trim();
-      if(!text) return;
-      this.tasks.push({ id: 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), text, date: this.todayStr, time: this.newTaskTime ? this.newTaskTime.trim() : '', done: false, order: this.nextOrder(this.todayStr) });
-      this.newTaskText = '';
-      this.newTaskTime = '';
-      this.persist();
+      const text=this.newTaskText.trim(); if(!text) return;
+      this.tasks.push({id:'task_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),text,date:this.todayStr,time:this.newTaskTime.trim(),done:false,order:this.nextOrder(this.todayStr)});
+      this.newTaskText=''; this.newTaskTime=''; this.persist();
     },
     addPlannedTask(){
-      const text = this.newPlannedText.trim();
-      if(!text || !this.selectedDate) return;
-      this.tasks.push({ id: 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), text, date: this.selectedDate, time: this.newPlannedTime.trim(), done: false, order: this.nextOrder(this.selectedDate) });
-      this.newPlannedText = ''; this.newPlannedTime = '';
-      this.persist();
+      const text=this.newPlannedText.trim(); if(!text||!this.selectedDate) return;
+      this.tasks.push({id:'task_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),text,date:this.selectedDate,time:this.newPlannedTime.trim(),done:false,order:this.nextOrder(this.selectedDate)});
+      this.newPlannedText=''; this.newPlannedTime=''; this.persist();
     },
-    setActiveTask(id){ this.activeTaskId = this.activeTaskId === id ? null : id; },
-    toggleTaskDone(task, evt){
-      const wasIncomplete = !task.done;
-      task.done = !task.done;
-      if(task.done && wasIncomplete){ this.playSuccessChime(); this.burstConfetti(evt); }
+    setActiveTask(id){ this.activeTaskId=this.activeTaskId===id?null:id; },
+    toggleTaskDone(task,evt){
+      const was=!task.done; task.done=!task.done;
+      if(task.done&&was){ this.playSuccessChime(); this.burstConfetti(evt); }
       this.persist();
     },
     deleteTask(id){
-      this.tasks = this.tasks.filter(t => t.id !== id);
-      if(this.activeTaskId === id) this.activeTaskId = null;
-      if(this.editingTaskId === id) this.editingTaskId = null;
+      this.tasks=this.tasks.filter(t=>t.id!==id);
+      if(this.activeTaskId===id) this.activeTaskId=null;
+      if(this.editingTaskId===id) this.editingTaskId=null;
+      if(this.showInlineEdit===id) this.showInlineEdit=null;
       this.persist();
     },
-    startEditTask(task){ this.editingTaskId = task.id; this.editText = task.text; this.editTime = task.time; },
+
+    // INLINE EDIT — main page only, uses inlineEditText / inlineEditTime
+    openInlineEdit(task){
+      if(this.showInlineEdit===task.id){ this.showInlineEdit=null; return; }
+      this.showInlineEdit=task.id;
+      this.inlineEditText=task.text;
+      this.inlineEditTime=task.time||'';
+    },
+    saveInlineEdit(task){
+      const text=this.inlineEditText.trim();
+      if(text) task.text=text;
+      task.time=this.inlineEditTime.trim();
+      this.showInlineEdit=null;
+      this.persist();
+    },
+
+    // CALENDAR EDIT — planner modal only, uses editText / editTime / editingTaskId
+    startEditTask(task){ this.editingTaskId=task.id; this.editText=task.text; this.editTime=task.time||''; },
     saveEditTask(task){
-      const text = this.editText.trim();
-      if(text) task.text = text;
-      task.time = this.editTime.trim();
-      this.editingTaskId = null;
-      this.persist();
+      const text=this.editText.trim(); if(text) task.text=text;
+      task.time=this.editTime.trim(); this.editingTaskId=null; this.persist();
     },
 
-    // ===================== DRAG REORDER =====================
-    onDragStart(task){ this.dragTaskId = task.id; },
-    onDragEnter(idx){ this.dragOverIndex = idx; },
+    // DRAG
+    onDragStart(task){ this.dragTaskId=task.id; },
+    onDragEnter(idx){ this.dragOverIndex=idx; },
     onDragEnd(){
-      if(this.dragTaskId == null){ return; }
-      const list = [...this.todayTasks];
-      const fromIdx = list.findIndex(t => t.id === this.dragTaskId);
-      const toIdx = this.dragOverIndex;
-      if(fromIdx > -1 && toIdx != null && fromIdx !== toIdx){
-        const moved = list.splice(fromIdx, 1)[0];
-        list.splice(toIdx, 0, moved);
-        list.forEach((t, i) => { t.order = i; });
-        this.persist();
+      if(this.dragTaskId==null) return;
+      const list=[...this.todayTasks];
+      const from=list.findIndex(t=>t.id===this.dragTaskId);
+      const to=this.dragOverIndex;
+      if(from>-1&&to!=null&&from!==to){
+        const moved=list.splice(from,1)[0]; list.splice(to,0,moved);
+        list.forEach((t,i)=>{ t.order=i; }); this.persist();
       }
-      this.dragTaskId = null; this.dragOverIndex = null;
+      this.dragTaskId=null; this.dragOverIndex=null;
     },
 
-    // ===================== CONFETTI =====================
+    // CONFETTI
     burstConfetti(evt){
       if(!evt) return;
-      const btn = evt.currentTarget;
-      const card = btn.closest('.task-card');
-      if(!card) return;
-      const rect = btn.getBoundingClientRect();
-      const cardRect = card.getBoundingClientRect();
-      const originX = rect.left - cardRect.left + rect.width/2;
-      const originY = rect.top - cardRect.top + rect.height/2;
-      const colors = ['var(--accent)', '#ffffff', 'var(--accent)'];
-      const count = 10;
-      for(let i=0; i<count; i++){
-        const p = document.createElement('span');
-        p.className = 'particle';
-        const angle = (Math.PI * 2 * i) / count + Math.random()*0.5;
-        const dist = 26 + Math.random()*22;
-        p.style.setProperty('--tx', (Math.cos(angle) * dist) + 'px');
-        p.style.setProperty('--ty', (Math.sin(angle) * dist) + 'px');
-        p.style.left = originX + 'px'; p.style.top = originY + 'px';
-        p.style.background = colors[i % colors.length];
-        card.appendChild(p);
-        setTimeout(() => p.remove(), 750);
+      const btn=evt.currentTarget; const card=btn.closest('.task-card'); if(!card) return;
+      const rect=btn.getBoundingClientRect(); const cr=card.getBoundingClientRect();
+      const ox=rect.left-cr.left+rect.width/2; const oy=rect.top-cr.top+rect.height/2;
+      const colors=['var(--accent)','#ffffff','var(--accent)'];
+      for(let i=0;i<10;i++){
+        const p=document.createElement('span'); p.className='particle';
+        const angle=(Math.PI*2*i)/10+Math.random()*0.5; const dist=26+Math.random()*22;
+        p.style.setProperty('--tx',(Math.cos(angle)*dist)+'px');
+        p.style.setProperty('--ty',(Math.sin(angle)*dist)+'px');
+        p.style.left=ox+'px'; p.style.top=oy+'px';
+        p.style.background=colors[i%colors.length];
+        card.appendChild(p); setTimeout(()=>p.remove(),750);
       }
-      btn.classList.add('check-pop');
-      setTimeout(() => btn.classList.remove('check-pop'), 400);
+      btn.classList.add('check-pop'); setTimeout(()=>btn.classList.remove('check-pop'),400);
     },
 
-    // ===================== PERSISTENCE =====================
+    // PERSISTENCE
     persist(){
-      const payload = {
-        themeKey: this.themeKey, themeSettings: this.themeSettings, durations: this.durations, soundEnabled: this.soundEnabled,
-        totalPomodoros: this.totalPomodoros, pomodorosThisCycle: this.pomodorosThisCycle, longBreakAfter: this.longBreakAfter,
-        sessionLog: this.sessionLog, tasks: this.tasks, mode: this.mode,
+      const payload={
+        themeKey:this.themeKey, themeSettings:this.themeSettings, durations:this.durations, soundEnabled:this.soundEnabled,
+        totalPomodoros:this.totalPomodoros, pomodorosThisCycle:this.pomodorosThisCycle, longBreakAfter:this.longBreakAfter,
+        sessionLog:this.sessionLog, tasks:this.tasks, mode:this.mode,
       };
-      try{ localStorage.setItem('daydone_state_v3', JSON.stringify(payload)); }
-      catch(e){ this._memoryStore = payload; }
+      try{ localStorage.setItem('daydone_state_v3',JSON.stringify(payload)); } catch(e){ this._memoryStore=payload; }
     },
     load(){
-      let data = null;
-      try{ const raw = localStorage.getItem('daydone_state_v3'); if(raw) data = JSON.parse(raw); }
-      catch(e){ data = this._memoryStore || null; }
+      let data=null;
+      try{ const raw=localStorage.getItem('daydone_state_v3'); if(raw) data=JSON.parse(raw); } catch(e){ data=this._memoryStore||null; }
       if(!data) return;
-      if(typeof data.themeKey === 'string' && THEMES[data.themeKey]) this.themeKey = data.themeKey;
-      if(data.themeSettings){
-        Object.keys(this.themeSettings).forEach(k => {
-          if(data.themeSettings[k]) this.themeSettings[k] = Object.assign({}, this.themeSettings[k], data.themeSettings[k]);
-        });
-      }
-      if(data.durations) this.durations = Object.assign(this.durations, data.durations);
-      if(typeof data.soundEnabled === 'boolean') this.soundEnabled = data.soundEnabled;
-      if(typeof data.totalPomodoros === 'number') this.totalPomodoros = data.totalPomodoros;
-      if(typeof data.longBreakAfter === 'number') this.longBreakAfter = data.longBreakAfter;
-      if(typeof data.pomodorosThisCycle === 'number') this.pomodorosThisCycle = data.pomodorosThisCycle;
-      if(Array.isArray(data.sessionLog)) this.sessionLog = data.sessionLog;
-      if(Array.isArray(data.tasks)) this.tasks = data.tasks.map(t => ({ order: 0, time: '', ...t }));
-      if(data.mode) this.mode = data.mode;
-    }
+      if(typeof data.themeKey==='string'&&THEMES[data.themeKey]) this.themeKey=data.themeKey;
+      if(data.themeSettings){ Object.keys(this.themeSettings).forEach(k=>{ if(data.themeSettings[k]) this.themeSettings[k]=Object.assign({},this.themeSettings[k],data.themeSettings[k]); }); }
+      if(data.durations) this.durations=Object.assign(this.durations,data.durations);
+      if(typeof data.soundEnabled==='boolean') this.soundEnabled=data.soundEnabled;
+      if(typeof data.totalPomodoros==='number') this.totalPomodoros=data.totalPomodoros;
+      if(typeof data.longBreakAfter==='number') this.longBreakAfter=data.longBreakAfter;
+      if(typeof data.pomodorosThisCycle==='number') this.pomodorosThisCycle=data.pomodorosThisCycle;
+      if(Array.isArray(data.sessionLog)) this.sessionLog=data.sessionLog;
+      if(Array.isArray(data.tasks)) this.tasks=data.tasks.map(t=>({order:0,time:'',...t}));
+      if(data.mode) this.mode=data.mode;
+    },
   },
 
-  created(){
-    this.load();
-    this.selectedDate = this.todayStr;
-  },
-
+  created(){ this.load(); this.selectedDate=this.todayStr; },
   mounted(){
     this.applyTheme();
-    this.secondsLeft = this.durations[this.mode] * 60;
-
+    this.secondsLeft=this.durations[this.mode]*60;
     this.rotateQuote();
-    this.quoteInterval = setInterval(this.rotateQuote, 14000);
-
-    if(this.mode !== 'pomodoro') this.rotateBreakPrompt();
-    this.breakPromptInterval = setInterval(() => { if(this.mode !== 'pomodoro') this.rotateBreakPrompt(); }, 9000);
-
+    this.quoteInterval=setInterval(this.rotateQuote,14000);
+    if(this.mode!=='pomodoro') this.rotateBreakPrompt();
+    this.breakPromptInterval=setInterval(()=>{ if(this.mode!=='pomodoro') this.rotateBreakPrompt(); },9000);
     this.measurePill();
-    this._onResize = () => this.measurePill();
-    window.addEventListener('resize', this._onResize);
+    this._onResize=()=>this.measurePill();
+    window.addEventListener('resize',this._onResize);
   },
-
   beforeUnmount(){
-    clearInterval(this.timerInterval);
-    clearInterval(this.quoteInterval);
-    clearInterval(this.breakPromptInterval);
-    window.removeEventListener('resize', this._onResize);
-  }
+    clearInterval(this.timerInterval); clearInterval(this.quoteInterval); clearInterval(this.breakPromptInterval);
+    window.removeEventListener('resize',this._onResize);
+  },
 
 }).mount('#app');
 </script>
